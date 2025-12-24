@@ -58,14 +58,11 @@ html, body {
 }
 
 body {
-  font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 14px;
+  font-family: Verdana, Arial, sans-serif;
+  font-size: 12px;
   line-height: 1.5;
   color: var(--color-text);
-  background-color: var(--color-parchment);
-  background-image:
-    radial-gradient(ellipse at top, var(--color-parchment-light) 0%, transparent 50%),
-    radial-gradient(ellipse at bottom, var(--color-tan) 0%, transparent 50%);
+  background-color: #2d1f14;
   min-height: 100vh;
 }
 
@@ -153,67 +150,70 @@ input, select, textarea {
 
 /* Panel/Card styling - classic Travian look */
 .panel {
-  background: linear-gradient(135deg, var(--color-cream) 0%, var(--color-parchment) 100%);
-  border: 2px solid var(--color-brown-medium);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-md);
+  background: #f5e6d3;
+  border: 1px solid #5c4033;
+  border-radius: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .panel-header {
-  background: linear-gradient(180deg, var(--color-brown-medium) 0%, var(--color-brown-dark) 100%);
-  color: var(--color-parchment-light);
-  padding: 8px 12px;
-  font-family: 'Cinzel', serif;
-  font-size: 0.875rem;
-  font-weight: 600;
-  border-bottom: 2px solid var(--color-brown-dark);
+  background: linear-gradient(180deg, #6b5344 0%, #5c4033 100%);
+  color: #f5deb3;
+  padding: 6px 10px;
+  font-family: Verdana, Arial, sans-serif;
+  font-size: 0.75rem;
+  font-weight: bold;
+  border-bottom: 1px solid #3d2817;
 }
 
 .panel-body {
-  padding: 12px;
+  padding: 10px;
+  font-size: 0.75rem;
 }
 
-/* Button styles */
+/* Button styles - Travian style */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 8px 16px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  border: 2px solid;
-  border-radius: var(--border-radius);
+  gap: 4px;
+  padding: 4px 12px;
+  font-size: 0.7rem;
+  font-family: Verdana, Arial, sans-serif;
+  font-weight: normal;
+  border: 1px solid;
+  border-radius: 2px;
   transition: all 0.15s ease;
+  cursor: pointer;
 }
 
 .btn-primary {
-  background: linear-gradient(180deg, var(--color-green-light) 0%, var(--color-green-dark) 100%);
-  border-color: var(--color-green-dark);
+  background: linear-gradient(180deg, #6b8e4e 0%, #4a6b32 100%);
+  border-color: #3a5222;
   color: white;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
 }
 
 .btn-primary:hover {
-  background: linear-gradient(180deg, var(--color-green-dark) 0%, var(--color-primary-hover) 100%);
+  background: linear-gradient(180deg, #5a7d3d 0%, #3a5222 100%);
 }
 
 .btn-primary:disabled {
-  background: var(--color-stone-light);
-  border-color: var(--color-stone-medium);
+  background: #a0a0a0;
+  border-color: #808080;
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 .btn-secondary {
-  background: linear-gradient(180deg, var(--color-tan) 0%, var(--color-brown-medium) 100%);
-  border-color: var(--color-brown-dark);
-  color: var(--color-brown-dark);
+  background: linear-gradient(180deg, #d4a574 0%, #b08050 100%);
+  border-color: #8b6040;
+  color: #3d2817;
 }
 
 .btn-secondary:hover {
-  background: linear-gradient(180deg, var(--color-brown-medium) 0%, var(--color-brown-dark) 100%);
-  color: var(--color-parchment);
+  background: linear-gradient(180deg, #b08050 0%, #8b6040 100%);
+  color: #fff;
 }
 
 /* Form inputs */

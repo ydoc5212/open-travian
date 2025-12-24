@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useGameStore } from '../stores/gameStore';
 import { buildingApi } from '../services/api';
 import { BUILDING_DATA, calculateCostMultiplier } from '@travian/shared';
@@ -6,55 +7,38 @@ import type { BuildingType, Resources } from '@travian/shared';
 import { Timer } from '../components/Timer';
 import styles from './VillageView.module.css';
 
-// Classic Travian village center layout (22 building slots in a grid)
+// Travian bg0.jpg village center building slot positions
+// Precisely calibrated to TravianZ bg0.jpg (556x406px)
 const BUILDING_POSITIONS = [
-  { slot: 1, x: 20, y: 15 },
-  { slot: 2, x: 40, y: 10 },
-  { slot: 3, x: 60, y: 10 },
-  { slot: 4, x: 80, y: 15 },
-  { slot: 5, x: 10, y: 30 },
-  { slot: 6, x: 30, y: 25 },
-  { slot: 7, x: 50, y: 22 },
-  { slot: 8, x: 70, y: 25 },
-  { slot: 9, x: 90, y: 30 },
-  { slot: 10, x: 15, y: 48 },
-  { slot: 11, x: 35, y: 45 },
-  { slot: 12, x: 65, y: 45 },
-  { slot: 13, x: 85, y: 48 },
-  { slot: 14, x: 10, y: 65 },
-  { slot: 15, x: 30, y: 62 },
-  { slot: 16, x: 50, y: 58 }, // Rally Point (center)
-  { slot: 17, x: 70, y: 62 },
-  { slot: 18, x: 90, y: 65 },
-  { slot: 19, x: 25, y: 80 },
-  { slot: 20, x: 50, y: 85 }, // Wall position
-  { slot: 21, x: 75, y: 80 },
-  { slot: 22, x: 50, y: 75 },
+  // Row 1 - top (4 slots)
+  { slot: 1, x: 18, y: 8 },
+  { slot: 2, x: 38, y: 5 },
+  { slot: 3, x: 62, y: 5 },
+  { slot: 4, x: 82, y: 8 },
+  // Row 2 (5 slots)
+  { slot: 5, x: 8, y: 22 },
+  { slot: 6, x: 28, y: 18 },
+  { slot: 7, x: 50, y: 15 },
+  { slot: 8, x: 72, y: 18 },
+  { slot: 9, x: 92, y: 22 },
+  // Row 3 (4 slots)
+  { slot: 10, x: 15, y: 38 },
+  { slot: 11, x: 38, y: 35 },
+  { slot: 12, x: 62, y: 35 },
+  { slot: 13, x: 85, y: 38 },
+  // Row 4 (5 slots) - includes rally point
+  { slot: 14, x: 8, y: 55 },
+  { slot: 15, x: 28, y: 52 },
+  { slot: 16, x: 50, y: 50 }, // Rally Point (center)
+  { slot: 17, x: 72, y: 52 },
+  { slot: 18, x: 92, y: 55 },
+  // Row 5 - bottom (4 slots)
+  { slot: 19, x: 22, y: 72 },
+  { slot: 20, x: 50, y: 88 }, // Wall position
+  { slot: 21, x: 78, y: 72 },
+  { slot: 22, x: 50, y: 68 },
 ];
 
-// Building sprite paths
-function getBuildingSprite(type: BuildingType | null): string {
-  if (!type) return '/assets/buildings/empty.svg';
-
-  const spriteMap: Partial<Record<BuildingType, string>> = {
-    main_building: '/assets/buildings/main_building.svg',
-    warehouse: '/assets/buildings/warehouse.svg',
-    granary: '/assets/buildings/granary.svg',
-    barracks: '/assets/buildings/barracks.svg',
-    stable: '/assets/buildings/stable.svg',
-    workshop: '/assets/buildings/workshop.svg',
-    academy: '/assets/buildings/academy.svg',
-    smithy: '/assets/buildings/smithy.svg',
-    rally_point: '/assets/buildings/rally_point.svg',
-    marketplace: '/assets/buildings/marketplace.svg',
-    embassy: '/assets/buildings/embassy.svg',
-    wall: '/assets/buildings/wall.svg',
-    residence: '/assets/buildings/residence.svg',
-    cranny: '/assets/buildings/cranny.svg',
-  };
-
-  return spriteMap[type] || '/assets/buildings/empty.svg';
-}
 
 export function VillageView() {
   const currentVillage = useGameStore((state) => state.currentVillage);
@@ -170,11 +154,6 @@ export function VillageView() {
                   : 'Empty slot'
               }
             >
-              <img
-                src={getBuildingSprite(building.type as BuildingType)}
-                alt={building.type || 'empty'}
-                className={styles.buildingSprite}
-              />
               {!isEmpty && (
                 <span className={styles.buildingLevel}>{building.level}</span>
               )}
@@ -187,11 +166,10 @@ export function VillageView() {
           );
         })}
 
-        {/* Village name overlay */}
-        <div className={styles.villageLabel}>
-          <h2>{currentVillage.name}</h2>
-          <span>Village Center</span>
-        </div>
+        {/* Resource fields link - click to exit to resource view */}
+        <Link to="/" className={styles.resourceFieldsLink} title="Exit to Resource Fields">
+          Resource Fields
+        </Link>
       </div>
 
       {/* Selected building info panel */}
@@ -268,11 +246,6 @@ export function VillageView() {
                           className={`${styles.buildingOption} ${!affordable ? styles.cantAfford : ''}`}
                         >
                           <div className={styles.buildingOptionHeader}>
-                            <img
-                              src={getBuildingSprite(b.type as BuildingType)}
-                              alt={b.type}
-                              className={styles.buildingOptionSprite}
-                            />
                             <strong>{b.name}</strong>
                           </div>
                           <CostDisplay cost={b.cost} resources={currentVillage.resources} compact />

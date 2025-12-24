@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useGameStore } from '../stores/gameStore';
 import { resourceApi } from '../services/api';
 import { RESOURCE_FIELD_DATA, calculateCostMultiplier } from '@travian/shared';
@@ -6,46 +7,42 @@ import type { ResourceFieldType, Resources } from '@travian/shared';
 import { Timer } from '../components/Timer';
 import styles from './ResourceFieldsView.module.css';
 
-// Classic Travian resource field layout (outer ring of village)
-// The positions are arranged in a rough circle
+// Travian f1.jpg resource field layout positions (4-4-4-6 village type)
+// Precisely calibrated to TravianZ f1.jpg (556x408px)
 const FIELD_POSITIONS = [
-  { slot: 1, x: 50, y: 10 },   // Top
-  { slot: 2, x: 75, y: 15 },
-  { slot: 3, x: 90, y: 35 },
-  { slot: 4, x: 95, y: 55 },  // Right
-  { slot: 5, x: 90, y: 75 },
-  { slot: 6, x: 75, y: 90 },
-  { slot: 7, x: 50, y: 95 },  // Bottom
-  { slot: 8, x: 25, y: 90 },
-  { slot: 9, x: 10, y: 75 },
-  { slot: 10, x: 5, y: 55 },  // Left
-  { slot: 11, x: 10, y: 35 },
-  { slot: 12, x: 25, y: 15 },
-  { slot: 13, x: 35, y: 30 }, // Inner ring
-  { slot: 14, x: 65, y: 30 },
-  { slot: 15, x: 75, y: 50 },
-  { slot: 16, x: 65, y: 70 },
-  { slot: 17, x: 35, y: 70 },
-  { slot: 18, x: 25, y: 50 },
+  // Top row - 3 fields
+  { slot: 1, x: 28, y: 6 },
+  { slot: 2, x: 50, y: 3 },
+  { slot: 3, x: 72, y: 6 },
+  // Upper left/right
+  { slot: 4, x: 8, y: 18 },
+  { slot: 5, x: 92, y: 18 },
+  // Mid-upper left/right
+  { slot: 6, x: 15, y: 35 },
+  { slot: 7, x: 85, y: 35 },
+  // Middle row - 4 fields around center
+  { slot: 8, x: 6, y: 52 },
+  { slot: 9, x: 30, y: 50 },
+  { slot: 10, x: 70, y: 50 },
+  { slot: 11, x: 94, y: 52 },
+  // Lower left/right
+  { slot: 12, x: 15, y: 68 },
+  { slot: 13, x: 85, y: 68 },
+  // Bottom row - 5 fields (croplands)
+  { slot: 14, x: 8, y: 85 },
+  { slot: 15, x: 28, y: 90 },
+  { slot: 16, x: 50, y: 93 },
+  { slot: 17, x: 72, y: 90 },
+  { slot: 18, x: 92, y: 85 },
 ];
 
-const FIELD_COLORS: Record<ResourceFieldType, string> = {
-  woodcutter: '#228B22',
-  clay_pit: '#CD853F',
-  iron_mine: '#708090',
-  cropland: '#DAA520',
+// Field type for tooltip display
+const FIELD_NAMES: Record<ResourceFieldType, string> = {
+  woodcutter: 'Woodcutter',
+  clay_pit: 'Clay Pit',
+  iron_mine: 'Iron Mine',
+  cropland: 'Cropland',
 };
-
-// Field sprite paths
-function getFieldSprite(type: ResourceFieldType): string {
-  const spriteMap: Record<ResourceFieldType, string> = {
-    woodcutter: '/assets/fields/woodcutter.svg',
-    clay_pit: '/assets/fields/clay_pit.svg',
-    iron_mine: '/assets/fields/iron_mine.svg',
-    cropland: '/assets/fields/cropland.svg',
-  };
-  return spriteMap[type];
-}
 
 export function ResourceFieldsView() {
   const currentVillage = useGameStore((state) => state.currentVillage);
@@ -101,11 +98,10 @@ export function ResourceFieldsView() {
   return (
     <div className={styles.container}>
       <div className={styles.fieldMap}>
-        {/* Village center icon */}
-        <div className={styles.villageCenter}>
-          <span>🏰</span>
+        {/* Village center - clickable to go to village view */}
+        <Link to="/village" className={styles.villageCenter} title="Enter Village">
           <span className={styles.villageName}>{currentVillage.name}</span>
-        </div>
+        </Link>
 
         {/* Resource fields */}
         {FIELD_POSITIONS.map((pos) => {
@@ -127,13 +123,8 @@ export function ResourceFieldsView() {
                 top: `${pos.y}%`,
               }}
               onClick={() => setSelectedField(isSelected ? null : pos.slot)}
-              title={`${RESOURCE_FIELD_DATA[fieldType].name} (Level ${field.level})`}
+              title={`${FIELD_NAMES[fieldType]} (Level ${field.level})`}
             >
-              <img
-                src={getFieldSprite(fieldType)}
-                alt={fieldType}
-                className={styles.fieldSprite}
-              />
               <span className={styles.fieldLevel}>{field.level}</span>
               {isUpgradingField && (
                 <div className={styles.fieldTimer}>

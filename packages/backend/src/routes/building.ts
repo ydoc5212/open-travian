@@ -318,7 +318,7 @@ router.post('/village/:villageId/slot/:slot/cancel', async (req: AuthRequest, re
       where: {
         villageId,
         type: 'building_complete',
-        data: { path: ['slot'], equals: slotNum },
+        data: { path: ['slot'], equals: String(slotNum) },
         processed: false,
       },
     });

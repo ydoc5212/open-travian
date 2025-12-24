@@ -290,6 +290,43 @@ export const UNIT_IMAGE_IDS: Record<string, number> = {
   chief: 29, teuton_settler: 30,
 };
 
+// Building ID mapping for TravianZ image files (g10.gif, g15.gif, etc.)
+export const BUILDING_IMAGE_IDS: Record<string, number> = {
+  // Resource bonus buildings
+  sawmill: 5, brickyard: 6, iron_foundry: 7, grain_mill: 8, bakery: 9,
+  // Storage
+  warehouse: 10, granary: 11,
+  // Military production
+  smithy: 12, armoury: 13,
+  // Infrastructure
+  tournament_square: 14, main_building: 15, rally_point: 16,
+  marketplace: 17, embassy: 18,
+  // Military training
+  barracks: 19, stable: 20, workshop: 21,
+  // Defense
+  cranny: 22,
+  // Walls (tribe-specific)
+  wall: 23, // Roman city wall (default)
+  // Expansion
+  stonemason: 26, brewery: 27, trapper: 28, heros_mansion: 29,
+  // Trade
+  trade_office: 35,
+  // Research & culture
+  academy: 36, town_hall: 37,
+  // Expansion
+  residence: 40, palace: 41,
+  // Special
+  horse_drinking_trough: 33,
+};
+
+// Resource field ID mapping for TravianZ (g1.gif - g4.gif)
+export const FIELD_IMAGE_IDS: Record<string, number> = {
+  woodcutter: 1,
+  clay_pit: 2,
+  iron_mine: 3,
+  cropland: 4,
+};
+
 export const UNIT_DATA: Record<string, UnitStats> = {
   // ========== ROMANS (Units 1-10) ==========
   legionnaire: {

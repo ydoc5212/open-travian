@@ -1,6 +1,14 @@
 import type { Resources } from '@travian/shared';
 import styles from './ResourceBar.module.css';
 
+// TravianZ resource icon IDs
+const RESOURCE_ICONS: Record<string, string> = {
+  lumber: '/assets/resources/1.gif',
+  clay: '/assets/resources/2.gif',
+  iron: '/assets/resources/3.gif',
+  crop: '/assets/resources/4.gif',
+};
+
 interface ResourceBarProps {
   resources: Resources;
   production: Resources;
@@ -21,7 +29,6 @@ export function ResourceBar({
       value: resources.lumber,
       production: production.lumber,
       capacity: warehouseCapacity,
-      color: '#8B4513',
     },
     {
       type: 'clay',
@@ -29,7 +36,6 @@ export function ResourceBar({
       value: resources.clay,
       production: production.clay,
       capacity: warehouseCapacity,
-      color: '#CD853F',
     },
     {
       type: 'iron',
@@ -37,7 +43,6 @@ export function ResourceBar({
       value: resources.iron,
       production: production.iron,
       capacity: warehouseCapacity,
-      color: '#708090',
     },
     {
       type: 'crop',
@@ -45,7 +50,6 @@ export function ResourceBar({
       value: resources.crop,
       production: production.crop,
       capacity: granaryCapacity,
-      color: '#DAA520',
     },
   ];
 
@@ -53,9 +57,10 @@ export function ResourceBar({
     <div className={styles.resourceBar}>
       {resourceItems.map((item) => (
         <div key={item.type} className={styles.resourceItem}>
-          <div
+          <img
+            src={RESOURCE_ICONS[item.type]}
+            alt={item.label}
             className={styles.resourceIcon}
-            style={{ backgroundColor: item.color }}
             title={item.label}
           />
           <div className={styles.resourceInfo}>
