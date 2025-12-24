@@ -100,7 +100,7 @@ export function GameLayout() {
       {/* Top bar with resources */}
       <header className={styles.header}>
         <div className={styles.headerLeft}>
-          <h1 className={styles.logo}>Travian Clone</h1>
+          <h1 className={styles.logo}>Open Travian</h1>
           {villages.length > 1 && (
             <select
               className={styles.villageSelect}
