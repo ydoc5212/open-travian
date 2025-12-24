@@ -1,21 +1,40 @@
-# Travian Clone
+# Open Travian
 
-A browser-based MMORTS game inspired by classic Travian (2004-2008 era). Built with React, Node.js, PostgreSQL, and Redis.
+An open-source browser-based strategy game inspired by classic Travian (2004-2008 era). Built with React, Node.js, and PostgreSQL with accurate game mechanics based on original Travian formulas.
 
-## Features (Phase 1 - MVP)
+## Features
 
-- **User Authentication**: Register with tribe selection (Romans, Gauls, Teutons)
-- **Village Management**: Resource fields and village center buildings
-- **Resource System**: Real-time resource production (lumber, clay, iron, crop)
-- **Construction Queue**: Build and upgrade buildings with real-time timers
-- **Classic Aesthetics**: Earthy color palette inspired by original Travian
+### Tribes & Units
+- **Romans**: Legionnaire, Praetorian, Imperian, Equites Legati, Equites Imperatoris, Equites Caesaris, Ram, Catapult, Senator, Settler
+- **Gauls**: Phalanx, Swordsman, Pathfinder, Theutates Thunder, Druidrider, Haeduan, Ram, Catapult, Chieftain, Settler
+- **Teutons**: Clubswinger, Spearman, Axeman, Scout, Paladin, Teutonic Knight, Ram, Catapult, Chief, Settler
+
+### Combat System
+- Accurate Travian combat formulas
+- Infantry vs cavalry defense calculations
+- Tribe-specific wall bonuses (Romans 3%, Gauls 2.5%, Teutons 2% per level)
+- Morale system based on population ratio
+- Raid vs attack modes
+- Battle reports
+
+### Village Management
+- 18 resource fields (4-4-4-6 distribution)
+- 22 building slots in village center
+- Real-time resource production
+- Construction queue with timers
+- Warehouse and granary capacity
+
+### Buildings
+- Main Building, Warehouse, Granary, Marketplace, Embassy
+- Barracks, Stable, Workshop, Academy, Smithy
+- Rally Point, Wall, Cranny, Residence/Palace
+- Tribe-specific: Horse Drinking Trough (Romans), Trapper (Gauls), Brewery (Teutons)
 
 ## Tech Stack
 
-- **Frontend**: React 18 + TypeScript, Vite, Zustand, Socket.io-client
-- **Backend**: Node.js + Express, TypeScript, Prisma ORM
-- **Database**: PostgreSQL 16
-- **Cache/Queue**: Redis 7
+- **Frontend**: React 18, TypeScript, Vite, Zustand, Socket.io-client
+- **Backend**: Node.js, Express, TypeScript, Prisma ORM
+- **Database**: PostgreSQL
 - **Real-time**: Socket.io
 
 ## Quick Start
@@ -23,64 +42,56 @@ A browser-based MMORTS game inspired by classic Travian (2004-2008 era). Built w
 ### Prerequisites
 
 - Node.js 18+
-- Docker & Docker Compose (for PostgreSQL and Redis)
+- Docker & Docker Compose (for PostgreSQL)
 
 ### Setup
 
-1. **Start the databases**:
-   ```bash
-   docker-compose up -d
-   ```
+```bash
+# Start PostgreSQL
+docker-compose up -d
 
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+# Install dependencies
+npm install
 
-3. **Build the shared package**:
-   ```bash
-   npm run build -w @travian/shared
-   ```
+# Build shared package
+npm run build
 
-4. **Generate Prisma client and push schema**:
-   ```bash
-   npm run db:generate
-   npm run db:push
-   ```
+# Setup database
+npm run db:generate
+npm run db:push
 
-5. **Start development servers**:
-   ```bash
-   npm run dev
-   ```
+# Start dev servers
+npm run dev
+```
 
-6. **Open the game**: http://localhost:5173
+Open http://localhost:5173 and use the **Quick Demo** button for instant access.
 
 ## Project Structure
 
 ```
-travian-clone/
+open-travian/
 ├── packages/
-│   ├── frontend/        # React application
+│   ├── frontend/          # React application
 │   │   ├── src/
-│   │   │   ├── components/
-│   │   │   ├── layouts/
-│   │   │   ├── pages/
-│   │   │   ├── services/
-│   │   │   ├── stores/
-│   │   │   └── styles/
-│   │   └── package.json
-│   ├── backend/         # Express API server
+│   │   │   ├── components/  # Reusable UI components
+│   │   │   ├── layouts/     # Page layouts
+│   │   │   ├── pages/       # Route pages
+│   │   │   ├── services/    # API & socket clients
+│   │   │   ├── stores/      # Zustand state stores
+│   │   │   └── styles/      # Global CSS
+│   │   └── public/assets/   # Images (units, buildings)
+│   ├── backend/           # Express API server
 │   │   ├── src/
-│   │   │   ├── jobs/
-│   │   │   ├── middleware/
-│   │   │   ├── routes/
-│   │   │   ├── services/
-│   │   │   └── socket/
-│   │   ├── prisma/
-│   │   └── package.json
-│   └── shared/          # Shared types and constants
-│       ├── src/
-│       └── package.json
+│   │   │   ├── jobs/        # Background job processor
+│   │   │   ├── middleware/  # Auth middleware
+│   │   │   ├── routes/      # API routes
+│   │   │   ├── services/    # Business logic
+│   │   │   └── socket/      # Socket.io handlers
+│   │   └── prisma/          # Database schema
+│   └── shared/            # Shared types & game constants
+│       └── src/
+│           ├── types.ts     # TypeScript types
+│           └── constants.ts # Game data & formulas
 ├── docker-compose.yml
 └── package.json
 ```
@@ -88,88 +99,74 @@ travian-clone/
 ## Game Mechanics
 
 ### Resources
+Resources are calculated on-demand based on elapsed time:
 - **Lumber**: Produced by Woodcutters
 - **Clay**: Produced by Clay Pits
 - **Iron**: Produced by Iron Mines
-- **Crop**: Produced by Croplands (also consumed by population and troops)
+- **Crop**: Produced by Croplands (consumed by population & troops)
 
-### Buildings
-Resources are calculated on-demand, not via server ticks. This means:
-- Resources accumulate based on time elapsed since last calculation
-- No server-side polling required
-- Accurate to the second
+### Production Formula
+Uses accurate Travian lookup table per level:
+```
+Level:  1   2   3   4   5   6   7   8   9   10  ...
+Prod:   5   9  15  22  33  50  70 100 145 200  ...
+```
 
-### Timer Speed
-For development, timers run at **10x speed** (configurable in `packages/shared/src/constants.ts`).
+### Combat Formula
+- Offense = sum(unit_attack × quantity) × morale
+- Defense = sum(weighted_defense × quantity) × wall_bonus
+- Weighted defense based on attacker infantry/cavalry ratio
+- Losses calculated using `(weaker/stronger)^1.5` formula
+
+### Speed Multiplier
+Development mode runs at **100x speed** (configurable in `constants.ts`).
 
 ## Development
 
-### Available Scripts
+### Scripts
 
 ```bash
-# Start dev servers (frontend + backend)
-npm run dev
+npm run dev           # Start frontend + backend
+npm run dev:backend   # Backend only
+npm run dev:frontend  # Frontend only
+npm run build         # Build all packages
 
-# Start only backend
-npm run dev:backend
-
-# Start only frontend
-npm run dev:frontend
-
-# Build all packages
-npm run build
-
-# Database operations
-npm run db:generate    # Generate Prisma client
-npm run db:push        # Push schema to database
-npm run db:studio      # Open Prisma Studio
+# Database
+npm run db:generate   # Generate Prisma client
+npm run db:push       # Push schema to database
+npm run db:studio     # Open Prisma Studio
 ```
 
 ### Environment Variables
 
-Backend (`.env` in `packages/backend/`):
+Create `.env` in `packages/backend/`:
 ```env
 DATABASE_URL="postgresql://travian:travian_dev@localhost:5432/travian"
-REDIS_URL="redis://localhost:6379"
 JWT_SECRET="your-secret-key"
 PORT=3001
 ```
 
 ## Roadmap
 
-### Phase 1: Foundation (Current) ✅
-- [x] Project scaffolding
-- [x] User authentication
-- [x] Village resource fields
-- [x] Village center buildings
-- [x] Construction timers
-- [x] Resource calculation engine
-- [x] Real-time updates via Socket.io
-
-### Phase 2: Village Development
-- [ ] Complete building tree
-- [ ] Building prerequisites system
-- [ ] Production bonuses
-
-### Phase 3: Military & Combat
-- [ ] Troop training
-- [ ] Attack/raid system
-- [ ] Battle reports
-
-### Phase 4: World Map
-- [ ] Map view with coordinates
-- [ ] Village expansion
-- [ ] Settlers
-
-### Phase 5: Multiplayer
+- [x] User authentication with tribe selection
+- [x] Village resource fields & buildings
+- [x] Real-time resource production
+- [x] Construction queue with timers
+- [x] All 30 units for 3 tribes
+- [x] Troop training system
+- [x] Combat system with accurate formulas
+- [x] Battle reports
+- [x] Rally point for attacks/raids
+- [ ] World map view
+- [ ] Village expansion (settlers)
 - [ ] Alliances
-- [ ] Messaging
-- [ ] Attack notifications
+- [ ] Messaging system
+- [ ] Hero system
 
-### Phase 6: Polish
-- [ ] All three tribes
-- [ ] Custom assets
-- [ ] Balance tuning
+## Credits
+
+- Game mechanics based on original Travian by Travian Games GmbH
+- Unit sprites from TravianZ open-source project
 
 ## License
 
