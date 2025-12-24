@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Main Building - Roman style columned building -->
+  <defs>
+    <linearGradient id="roof" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B4513"/>
+      <stop offset="100%" style="stop-color:#654321"/>
+    </linearGradient>
+    <linearGradient id="wall" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F5DEB3"/>
+      <stop offset="100%" style="stop-color:#DEB887"/>
+    </linearGradient>
+  </defs>
+  <!-- Base/Foundation -->
+  <rect x="8" y="52" width="48" height="6" fill="#808080"/>
+  <!-- Main walls -->
+  <rect x="10" y="28" width="44" height="24" fill="url(#wall)" stroke="#8B7355" stroke-width="1"/>
+  <!-- Roof -->
+  <polygon points="32,8 56,28 8,28" fill="url(#roof)" stroke="#5C4033" stroke-width="1"/>
+  <!-- Columns -->
+  <rect x="14" y="32" width="6" height="20" fill="#E8E8E8" stroke="#A0A0A0" stroke-width="1"/>
+  <rect x="29" y="32" width="6" height="20" fill="#E8E8E8" stroke="#A0A0A0" stroke-width="1"/>
+  <rect x="44" y="32" width="6" height="20" fill="#E8E8E8" stroke="#A0A0A0" stroke-width="1"/>
+  <!-- Door -->
+  <rect x="26" y="40" width="12" height="12" fill="#5C4033"/>
+  <rect x="27" y="41" width="10" height="10" fill="#3D2817"/>
+  <!-- Window decorations -->
+  <rect x="15" y="34" width="4" height="4" fill="#87CEEB" stroke="#5C4033" stroke-width="0.5"/>
+  <rect x="45" y="34" width="4" height="4" fill="#87CEEB" stroke="#5C4033" stroke-width="0.5"/>
+</svg>

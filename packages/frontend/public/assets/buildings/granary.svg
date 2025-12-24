@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Granary - round silo style -->
+  <defs>
+    <linearGradient id="silo" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#D2B48C"/>
+      <stop offset="50%" style="stop-color:#F5DEB3"/>
+      <stop offset="100%" style="stop-color:#D2B48C"/>
+    </linearGradient>
+  </defs>
+  <!-- Foundation -->
+  <ellipse cx="32" cy="56" rx="20" ry="4" fill="#808080"/>
+  <!-- Main silo body -->
+  <ellipse cx="32" cy="54" rx="18" ry="3" fill="#A0522D"/>
+  <rect x="14" y="24" width="36" height="30" fill="url(#silo)" stroke="#8B7355" stroke-width="1"/>
+  <!-- Curved top -->
+  <ellipse cx="32" cy="24" rx="18" ry="6" fill="#DEB887" stroke="#8B7355" stroke-width="1"/>
+  <!-- Roof/cap -->
+  <ellipse cx="32" cy="18" rx="12" ry="4" fill="#8B4513"/>
+  <polygon points="32,8 44,18 20,18" fill="#654321"/>
+  <!-- Horizontal bands -->
+  <ellipse cx="32" cy="32" rx="18" ry="2" fill="none" stroke="#8B7355" stroke-width="1"/>
+  <ellipse cx="32" cy="42" rx="18" ry="2" fill="none" stroke="#8B7355" stroke-width="1"/>
+  <!-- Small door -->
+  <rect x="26" y="44" width="12" height="10" fill="#5C4033" stroke="#3D2817" stroke-width="0.5"/>
+  <!-- Wheat decoration on top -->
+  <line x1="32" y1="8" x2="32" y2="4" stroke="#DAA520" stroke-width="1.5"/>
+  <circle cx="32" cy="3" r="2" fill="#DAA520"/>
+</svg>

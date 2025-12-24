@@ -1,0 +1,289 @@
+.container {
+  max-width: 800px;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  font-size: 1.125rem;
+  color: var(--color-text-muted);
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--color-brown-medium);
+  padding-bottom: 4px;
+}
+
+.tab {
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  transition: all 0.15s ease;
+}
+
+.tab:hover {
+  background: var(--color-parchment);
+}
+
+.tab.active {
+  background: var(--color-brown-dark);
+  color: white;
+}
+
+/* Send Tab */
+.sendTab {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.targetSection h4,
+.attackTypeSection h4,
+.troopSection h4 {
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+  color: var(--color-brown-dark);
+}
+
+.coordsRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.coordsRow label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.coordInput {
+  width: 80px;
+  padding: 8px;
+  border: 2px solid var(--color-brown-medium);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  text-align: center;
+}
+
+.targetInfo {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--color-parchment);
+  border-radius: var(--border-radius);
+}
+
+.targetDetails {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.targetName {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.targetOwner {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.targetStats {
+  display: flex;
+  gap: 24px;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+/* Attack Type */
+.attackTypeOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.radioLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  padding: 12px;
+  border: 2px solid var(--color-brown-light);
+  border-radius: var(--border-radius);
+  transition: all 0.15s ease;
+}
+
+.radioLabel:hover {
+  border-color: var(--color-brown-medium);
+}
+
+.radioLabel input:checked + .radioText {
+  color: var(--color-brown-dark);
+}
+
+.radioLabel:has(input:checked) {
+  border-color: var(--color-green-dark);
+  background: rgba(var(--color-green-light-rgb), 0.1);
+}
+
+.radioText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.radioText strong {
+  font-size: 0.95rem;
+}
+
+/* Troop Selection */
+.noTroops {
+  text-align: center;
+  padding: 24px;
+  color: var(--color-text-muted);
+}
+
+.troopGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.troopRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--color-parchment);
+  border-radius: var(--border-radius);
+}
+
+.troopInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.troopName {
+  font-weight: 500;
+}
+
+.troopAvailable {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.troopInput {
+  width: 80px;
+  padding: 8px;
+  border: 2px solid var(--color-brown-medium);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  text-align: center;
+}
+
+/* Summary */
+.summarySection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: var(--color-tan);
+  border-radius: var(--border-radius);
+  border: 2px solid var(--color-brown-medium);
+}
+
+.travelTime {
+  display: flex;
+  gap: 8px;
+  font-size: 1rem;
+}
+
+.travelTime span {
+  color: var(--color-text-muted);
+}
+
+/* Attacks List */
+.attacksList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.noAttacks {
+  text-align: center;
+  padding: 32px;
+  color: var(--color-text-muted);
+}
+
+.attackCard {
+  padding: 16px;
+  background: var(--color-parchment);
+  border-radius: var(--border-radius);
+  border-left: 4px solid var(--color-danger);
+}
+
+.attackCard:has(.attackTo) {
+  border-left-color: var(--color-warning);
+}
+
+.attackHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.attackType {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  background: var(--color-brown-dark);
+  color: white;
+  border-radius: 4px;
+}
+
+.attackFrom,
+.attackTo {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.attackTroops {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+}
+
+.attackTroops span {
+  padding: 2px 8px;
+  background: var(--color-cream);
+  border-radius: 4px;
+}
+
+.attackTimer {
+  display: flex;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.attackTimer span:first-child {
+  color: var(--color-text-muted);
+}

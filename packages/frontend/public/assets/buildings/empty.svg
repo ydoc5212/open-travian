@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Empty building slot -->
+  <defs>
+    <linearGradient id="emptyGround" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#D2B48C"/>
+      <stop offset="100%" style="stop-color:#C4A882"/>
+    </linearGradient>
+  </defs>
+  <!-- Ground patch -->
+  <ellipse cx="32" cy="48" rx="24" ry="12" fill="url(#emptyGround)" stroke="#A0522D" stroke-width="1" stroke-dasharray="4,2"/>
+  <!-- Construction markers -->
+  <rect x="14" y="24" width="3" height="28" fill="#8B4513"/>
+  <rect x="47" y="24" width="3" height="28" fill="#8B4513"/>
+  <!-- Rope between stakes -->
+  <line x1="17" y1="28" x2="47" y2="28" stroke="#D2691E" stroke-width="1" stroke-dasharray="2,2"/>
+  <!-- Plus sign indicating "build here" -->
+  <rect x="28" y="36" width="8" height="2" fill="#808080"/>
+  <rect x="31" y="33" width="2" height="8" fill="#808080"/>
+  <!-- Small pile of materials -->
+  <rect x="20" y="46" width="6" height="4" fill="#A0522D"/>
+  <rect x="38" y="44" width="4" height="6" fill="#808080"/>
+  <!-- Shovel -->
+  <rect x="50" y="36" width="1.5" height="12" fill="#8B4513"/>
+  <ellipse cx="51" cy="34" rx="3" ry="2" fill="#707070"/>
+</svg>

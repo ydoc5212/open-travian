@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Academy - classical learning building -->
+  <defs>
+    <linearGradient id="marble" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF"/>
+      <stop offset="100%" style="stop-color:#E8E8E8"/>
+    </linearGradient>
+  </defs>
+  <!-- Foundation -->
+  <rect x="6" y="52" width="52" height="6" fill="#A0A0A0"/>
+  <rect x="4" y="56" width="56" height="4" fill="#808080"/>
+  <!-- Main building -->
+  <rect x="10" y="30" width="44" height="22" fill="url(#marble)" stroke="#C0C0C0" stroke-width="1"/>
+  <!-- Triangular pediment -->
+  <polygon points="32,10 58,30 6,30" fill="#E8E8E8" stroke="#C0C0C0" stroke-width="1"/>
+  <!-- Pediment decoration -->
+  <polygon points="32,16 48,28 16,28" fill="#F5F5F5"/>
+  <!-- Owl symbol (wisdom) -->
+  <circle cx="32" cy="22" r="4" fill="#808080"/>
+  <circle cx="30" cy="21" r="1" fill="#FFD700"/>
+  <circle cx="34" cy="21" r="1" fill="#FFD700"/>
+  <polygon points="32,23 30,26 34,26" fill="#FF8C00"/>
+  <!-- Columns -->
+  <rect x="12" y="32" width="4" height="20" fill="#F0F0F0" stroke="#D0D0D0" stroke-width="0.5"/>
+  <rect x="22" y="32" width="4" height="20" fill="#F0F0F0" stroke="#D0D0D0" stroke-width="0.5"/>
+  <rect x="38" y="32" width="4" height="20" fill="#F0F0F0" stroke="#D0D0D0" stroke-width="0.5"/>
+  <rect x="48" y="32" width="4" height="20" fill="#F0F0F0" stroke="#D0D0D0" stroke-width="0.5"/>
+  <!-- Column capitals -->
+  <rect x="11" y="30" width="6" height="3" fill="#E0E0E0"/>
+  <rect x="21" y="30" width="6" height="3" fill="#E0E0E0"/>
+  <rect x="37" y="30" width="6" height="3" fill="#E0E0E0"/>
+  <rect x="47" y="30" width="6" height="3" fill="#E0E0E0"/>
+  <!-- Door -->
+  <rect x="28" y="38" width="8" height="14" fill="#5C4033"/>
+  <!-- Scroll decoration -->
+  <rect x="30" y="40" width="4" height="6" fill="#F5DEB3" stroke="#8B7355" stroke-width="0.5"/>
+</svg>

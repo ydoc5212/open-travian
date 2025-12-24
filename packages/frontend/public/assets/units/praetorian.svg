@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Praetorian Guard - Elite Roman defender -->
+  <defs>
+    <linearGradient id="praetorianArmor" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4169E1"/>
+      <stop offset="100%" style="stop-color:#191970"/>
+    </linearGradient>
+    <linearGradient id="goldTrim" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700"/>
+      <stop offset="100%" style="stop-color:#DAA520"/>
+    </linearGradient>
+  </defs>
+  <!-- Legs -->
+  <rect x="26" y="48" width="5" height="12" fill="#DEB887"/>
+  <rect x="33" y="48" width="5" height="12" fill="#DEB887"/>
+  <rect x="25" y="56" width="6" height="6" rx="1" fill="url(#goldTrim)"/>
+  <rect x="33" y="56" width="6" height="6" rx="1" fill="url(#goldTrim)"/>
+  <!-- Body - decorated armor -->
+  <rect x="22" y="28" width="20" height="22" rx="3" fill="url(#praetorianArmor)"/>
+  <!-- Gold trim -->
+  <rect x="22" y="28" width="20" height="3" fill="url(#goldTrim)"/>
+  <rect x="22" y="47" width="20" height="3" fill="url(#goldTrim)"/>
+  <!-- Head -->
+  <circle cx="32" cy="18" r="9" fill="#DEB887"/>
+  <!-- Ornate helmet -->
+  <path d="M21 20 Q19 8 32 4 Q45 8 43 20" fill="#4169E1" stroke="url(#goldTrim)" stroke-width="2"/>
+  <!-- Large red crest -->
+  <path d="M26 4 Q32 -2 38 4" fill="none" stroke="#8B0000" stroke-width="6"/>
+  <!-- Face guard -->
+  <rect x="19" y="14" width="4" height="10" rx="1" fill="#4169E1"/>
+  <rect x="41" y="14" width="4" height="10" rx="1" fill="#4169E1"/>
+  <!-- Arms with armor -->
+  <ellipse cx="17" cy="34" rx="5" ry="6" fill="#4169E1"/>
+  <ellipse cx="47" cy="34" rx="5" ry="6" fill="#4169E1"/>
+  <!-- Large oval shield -->
+  <ellipse cx="12" cy="38" rx="10" ry="16" fill="#4169E1" stroke="url(#goldTrim)" stroke-width="2"/>
+  <!-- Shield eagle emblem -->
+  <path d="M12 34 L8 38 L12 42 L16 38 Z" fill="url(#goldTrim)"/>
+  <!-- Gladius -->
+  <rect x="48" y="24" width="3" height="20" fill="#C0C0C0"/>
+  <rect x="47" y="22" width="5" height="4" rx="1" fill="url(#goldTrim)"/>
+  <polygon points="49.5,44 47,48 52,48" fill="#C0C0C0"/>
+</svg>

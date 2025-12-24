@@ -1,0 +1,108 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: linear-gradient(135deg, var(--color-cream) 0%, var(--color-parchment) 100%);
+  border: 3px solid var(--color-brown-medium);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.header {
+  background: linear-gradient(180deg, var(--color-brown-dark) 0%, var(--color-brown-medium) 100%);
+  padding: 24px;
+  text-align: center;
+  border-bottom: 3px solid var(--color-brown-dark);
+}
+
+.header h1 {
+  color: var(--color-parchment);
+  margin-bottom: 4px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.header p {
+  color: var(--color-tan);
+}
+
+.form {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.footer {
+  padding: 16px 24px;
+  text-align: center;
+  border-top: 1px solid var(--color-brown-medium);
+  background: var(--color-parchment);
+}
+
+.tribeSelector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tribeOption {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border: 2px solid var(--color-brown-medium);
+  border-radius: var(--border-radius);
+  background: var(--color-cream);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tribeOption:hover {
+  border-color: var(--color-green-dark);
+  background: var(--color-parchment-light);
+}
+
+.tribeOption.selected {
+  border-color: var(--color-green-dark);
+  background: var(--color-green-pale);
+}
+
+.tribeOption input {
+  margin-top: 4px;
+}
+
+.tribeContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 24px;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-brown-medium);
+}
+
+.divider + button {
+  margin: 0 24px 16px;
+  width: calc(100% - 48px) !important;
+}

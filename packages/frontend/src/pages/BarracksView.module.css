@@ -1,0 +1,240 @@
+.container {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  font-size: 1.125rem;
+  color: var(--color-text-muted);
+}
+
+.mainPanel {
+  flex: 1;
+  min-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.noUnits {
+  text-align: center;
+  padding: 32px;
+  color: var(--color-text-muted);
+}
+
+.unitsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.unitCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 2px solid var(--color-brown-medium);
+  border-radius: var(--border-radius);
+  background: var(--color-cream);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.unitCard:hover {
+  border-color: var(--color-brown-dark);
+  transform: translateY(-2px);
+}
+
+.unitCard.selected {
+  border-color: var(--color-green-dark);
+  background: rgba(var(--color-green-light-rgb), 0.1);
+  box-shadow: 0 0 0 2px var(--color-green-light);
+}
+
+.unitCard.cantAfford {
+  opacity: 0.6;
+}
+
+.unitIcon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.unitIcon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.unitInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.unitName {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.unitStats {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+/* Queue */
+.queue {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.queueItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--color-parchment);
+  border-radius: var(--border-radius);
+}
+
+.queueUnitName {
+  font-weight: 500;
+}
+
+/* Detail Panel */
+.detailPanel {
+  width: 320px;
+}
+
+.statsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.statRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+}
+
+.statRow span {
+  color: var(--color-text-muted);
+}
+
+.costSection,
+.trainSection {
+  margin-bottom: 16px;
+}
+
+.costSection h4,
+.trainSection h4 {
+  font-size: 0.875rem;
+  margin-bottom: 8px;
+}
+
+.costGrid {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.costItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.875rem;
+}
+
+.costIcon {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.notEnough {
+  color: var(--color-danger);
+}
+
+.quantityRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.quantityInput {
+  width: 100px;
+  padding: 8px;
+  border: 2px solid var(--color-brown-medium);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  text-align: center;
+}
+
+.totalCost {
+  margin-bottom: 8px;
+}
+
+.totalCost > span {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.totalTime {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  margin-bottom: 16px;
+}
+
+.totalTime span {
+  color: var(--color-text-muted);
+}
+
+/* Troops Panel */
+.troopsPanel {
+  width: 250px;
+}
+
+.noTroops {
+  text-align: center;
+  padding: 24px;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.troopsList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.troopRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  background: var(--color-parchment);
+  border-radius: var(--border-radius);
+}
+
+.troopName {
+  font-size: 0.875rem;
+}
+
+.troopCount {
+  font-weight: 600;
+}

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Embassy - diplomatic building with flags -->
+  <defs>
+    <linearGradient id="embassy" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#E8E8E8"/>
+      <stop offset="100%" style="stop-color:#C0C0C0"/>
+    </linearGradient>
+  </defs>
+  <!-- Foundation -->
+  <rect x="8" y="54" width="48" height="4" fill="#808080"/>
+  <!-- Main building -->
+  <rect x="10" y="28" width="44" height="26" fill="url(#embassy)" stroke="#A0A0A0" stroke-width="1"/>
+  <!-- Roof/dome -->
+  <ellipse cx="32" cy="28" rx="22" ry="8" fill="#4169E1"/>
+  <ellipse cx="32" cy="26" rx="18" ry="6" fill="#6495ED"/>
+  <!-- Flag poles -->
+  <rect x="12" y="8" width="2" height="24" fill="#8B4513"/>
+  <rect x="50" y="8" width="2" height="24" fill="#8B4513"/>
+  <!-- Flags -->
+  <polygon points="14,8 26,12 26,18 14,14" fill="#DC143C"/>
+  <polygon points="52,8 52,14 40,18 40,12" fill="#228B22"/>
+  <!-- Central emblem -->
+  <circle cx="32" cy="40" r="6" fill="#FFD700" stroke="#DAA520" stroke-width="1"/>
+  <circle cx="32" cy="40" r="4" fill="#4169E1"/>
+  <!-- Door -->
+  <rect x="26" y="44" width="12" height="10" fill="#5C4033"/>
+  <path d="M 26 44 Q 32 38 38 44" fill="#5C4033"/>
+  <!-- Columns -->
+  <rect x="14" y="32" width="4" height="22" fill="#E0E0E0" stroke="#C0C0C0" stroke-width="0.5"/>
+  <rect x="46" y="32" width="4" height="22" fill="#E0E0E0" stroke="#C0C0C0" stroke-width="0.5"/>
+</svg>

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Iron Mine - cave entrance with ore -->
+  <defs>
+    <linearGradient id="rock" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#808080"/>
+      <stop offset="100%" style="stop-color:#404040"/>
+    </linearGradient>
+    <linearGradient id="cave" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2F2F2F"/>
+      <stop offset="100%" style="stop-color:#1a1a1a"/>
+    </linearGradient>
+  </defs>
+  <!-- Mountain/rock face -->
+  <polygon points="32,4 60,56 4,56" fill="url(#rock)"/>
+  <polygon points="32,8 56,52 8,52" fill="#696969"/>
+  <!-- Rock details -->
+  <polygon points="20,40 26,30 32,42" fill="#5a5a5a"/>
+  <polygon points="38,38 44,28 48,40" fill="#5a5a5a"/>
+  <!-- Cave entrance -->
+  <ellipse cx="32" cy="48" rx="14" ry="10" fill="url(#cave)"/>
+  <path d="M 18 48 Q 32 36 46 48" fill="#1a1a1a"/>
+  <!-- Wooden support beams -->
+  <rect x="18" y="38" width="3" height="18" fill="#8B4513"/>
+  <rect x="43" y="38" width="3" height="18" fill="#8B4513"/>
+  <rect x="18" y="36" width="28" height="3" fill="#A0522D"/>
+  <!-- Iron ore chunks -->
+  <polygon points="8,52 12,48 16,54 10,56" fill="#4a4a4a"/>
+  <polygon points="10,50 14,52 12,56" fill="#696969"/>
+  <polygon points="50,50 54,48 56,54 52,56" fill="#4a4a4a"/>
+  <!-- Ore sparkles -->
+  <circle cx="10" cy="52" r="1" fill="#B0C4DE"/>
+  <circle cx="52" cy="52" r="1" fill="#B0C4DE"/>
+  <circle cx="54" cy="50" r="0.5" fill="#E0E0E0"/>
+  <!-- Cart with ore -->
+  <rect x="24" y="52" width="10" height="6" fill="#8B4513"/>
+  <ellipse cx="26" cy="58" rx="2" ry="2" fill="#404040"/>
+  <ellipse cx="32" cy="58" rx="2" ry="2" fill="#404040"/>
+  <polygon points="25,52 29,48 33,52" fill="#606060"/>
+  <!-- Pickaxe -->
+  <rect x="56" y="40" width="2" height="12" fill="#8B4513"/>
+  <polygon points="54,38 60,38 58,44 56,44" fill="#707070"/>
+</svg>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Generic soldier silhouette -->
+  <defs>
+    <linearGradient id="defaultGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B7355"/>
+      <stop offset="100%" style="stop-color:#5C4033"/>
+    </linearGradient>
+  </defs>
+  <!-- Body -->
+  <ellipse cx="32" cy="52" rx="12" ry="8" fill="#5C4033"/>
+  <rect x="24" y="28" width="16" height="26" rx="2" fill="url(#defaultGrad)"/>
+  <!-- Head -->
+  <circle cx="32" cy="18" r="10" fill="#DEB887"/>
+  <!-- Helmet -->
+  <path d="M22 18 Q22 8 32 6 Q42 8 42 18" fill="#708090" stroke="#4A4A4A" stroke-width="1"/>
+  <!-- Arms -->
+  <rect x="16" y="30" width="8" height="4" rx="2" fill="#DEB887"/>
+  <rect x="40" y="30" width="8" height="4" rx="2" fill="#DEB887"/>
+  <!-- Shield -->
+  <ellipse cx="18" cy="38" rx="6" ry="10" fill="#8B4513" stroke="#5C4033" stroke-width="1"/>
+  <!-- Sword -->
+  <rect x="44" y="26" width="3" height="18" fill="#C0C0C0"/>
+  <rect x="42" y="24" width="7" height="3" fill="#8B4513"/>
+</svg>

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Clay Pit - excavation with clay -->
+  <defs>
+    <linearGradient id="clay" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#CD853F"/>
+      <stop offset="100%" style="stop-color:#A0522D"/>
+    </linearGradient>
+    <linearGradient id="dirt" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B7355"/>
+      <stop offset="100%" style="stop-color:#5C4033"/>
+    </linearGradient>
+  </defs>
+  <!-- Pit outline (darker earth around) -->
+  <ellipse cx="32" cy="40" rx="28" ry="16" fill="url(#dirt)"/>
+  <!-- Clay pit (inner) -->
+  <ellipse cx="32" cy="42" rx="22" ry="12" fill="url(#clay)"/>
+  <!-- Wet clay pools -->
+  <ellipse cx="26" cy="44" rx="8" ry="4" fill="#B8860B" opacity="0.7"/>
+  <ellipse cx="40" cy="40" rx="6" ry="3" fill="#B8860B" opacity="0.6"/>
+  <!-- Dug earth piles -->
+  <ellipse cx="8" cy="50" rx="6" ry="4" fill="#8B7355"/>
+  <ellipse cx="56" cy="48" rx="5" ry="3" fill="#8B7355"/>
+  <!-- Clay bricks stacked -->
+  <rect x="48" y="52" width="6" height="4" fill="#CD853F" stroke="#A0522D" stroke-width="0.5"/>
+  <rect x="49" y="48" width="4" height="4" fill="#D2691E" stroke="#A0522D" stroke-width="0.5"/>
+  <rect x="6" y="54" width="5" height="3" fill="#CD853F" stroke="#A0522D" stroke-width="0.5"/>
+  <!-- Shovel -->
+  <rect x="18" y="28" width="2" height="16" fill="#8B4513"/>
+  <ellipse cx="19" cy="26" rx="4" ry="3" fill="#808080"/>
+  <!-- Water puddle -->
+  <ellipse cx="32" cy="46" rx="4" ry="2" fill="#87CEEB" opacity="0.5"/>
+</svg>

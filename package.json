@@ -1,0 +1,21 @@
+{
+  "name": "travian-clone",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm run dev -w @travian/backend",
+    "dev:frontend": "npm run dev -w @travian/frontend",
+    "build": "npm run build -w @travian/shared && npm run build -w @travian/backend && npm run build -w @travian/frontend",
+    "db:generate": "npm run db:generate -w @travian/backend",
+    "db:push": "npm run db:push -w @travian/backend",
+    "db:studio": "npm run db:studio -w @travian/backend"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.3.3"
+  }
+}

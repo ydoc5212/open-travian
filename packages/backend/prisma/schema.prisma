@@ -1,0 +1,227 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String   @map("password_hash")
+  tribe        String   // 'romans' | 'gauls' | 'teutons'
+  createdAt    DateTime @default(now()) @map("created_at")
+  lastActiveAt DateTime @default(now()) @map("last_active_at")
+
+  // Relations
+  villages         Village[]
+  allianceMembership AllianceMember?
+  sentMessages     Message[]       @relation("SentMessages")
+  receivedMessages Message[]       @relation("ReceivedMessages")
+  reports          Report[]
+
+  @@map("users")
+}
+
+// ============================================
+// VILLAGE
+// ============================================
+
+model Village {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  name        String
+  xCoord      Int      @map("x_coord")
+  yCoord      Int      @map("y_coord")
+  isCapital   Boolean  @default(false) @map("is_capital")
+  loyalty     Int      @default(100)
+  population  Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Resources (stored amounts)
+  lumber      Float    @default(750)
+  clay        Float    @default(750)
+  iron        Float    @default(750)
+  crop        Float    @default(750)
+
+  // Storage capacities
+  warehouseCapacity Int @default(800) @map("warehouse_capacity")
+  granaryCapacity   Int @default(800) @map("granary_capacity")
+
+  // Last time resources were calculated
+  resourcesLastCalculatedAt DateTime @default(now()) @map("resources_last_calculated_at")
+
+  // Relations
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  buildings      Building[]
+  resourceFields ResourceField[]
+  troops         Troop[]
+
+  outgoingAttacks Attack[] @relation("AttackerVillage")
+  incomingAttacks Attack[] @relation("DefenderVillage")
+
+  @@unique([xCoord, yCoord])
+  @@index([userId])
+  @@map("villages")
+}
+
+// ============================================
+// BUILDINGS & RESOURCE FIELDS
+// ============================================
+
+model Building {
+  id               String    @id @default(uuid())
+  villageId        String    @map("village_id")
+  slot             Int       // 1-22 for village center buildings
+  type             String?   // BuildingType or null if empty slot
+  level            Int       @default(0)
+  upgradeStartedAt DateTime? @map("upgrade_started_at")
+  upgradeEndsAt    DateTime? @map("upgrade_ends_at")
+
+  village Village @relation(fields: [villageId], references: [id], onDelete: Cascade)
+
+  @@unique([villageId, slot])
+  @@index([villageId, upgradeEndsAt])
+  @@map("buildings")
+}
+
+model ResourceField {
+  id               String    @id @default(uuid())
+  villageId        String    @map("village_id")
+  slot             Int       // 1-18 for resource fields
+  type             String    // ResourceFieldType: 'woodcutter' | 'clay_pit' | 'iron_mine' | 'cropland'
+  level            Int       @default(0)
+  upgradeStartedAt DateTime? @map("upgrade_started_at")
+  upgradeEndsAt    DateTime? @map("upgrade_ends_at")
+
+  village Village @relation(fields: [villageId], references: [id], onDelete: Cascade)
+
+  @@unique([villageId, slot])
+  @@index([villageId, upgradeEndsAt])
+  @@map("resource_fields")
+}
+
+// ============================================
+// MILITARY
+// ============================================
+
+model Troop {
+  id                    String    @id @default(uuid())
+  villageId             String    @map("village_id")
+  unitType              String    @map("unit_type")
+  quantity              Int
+  status                String    @default("home") // 'home' | 'attacking' | 'reinforcing' | 'returning'
+  destinationVillageId  String?   @map("destination_village_id")
+  arrivesAt             DateTime? @map("arrives_at")
+
+  village Village @relation(fields: [villageId], references: [id], onDelete: Cascade)
+
+  @@index([villageId])
+  @@index([destinationVillageId, arrivesAt])
+  @@map("troops")
+}
+
+model Attack {
+  id                 String   @id @default(uuid())
+  attackerVillageId  String   @map("attacker_village_id")
+  defenderVillageId  String   @map("defender_village_id")
+  attackType         String   @map("attack_type") // 'attack' | 'raid' | 'scout'
+  troops             String   // JSON string: Array of { unitType, quantity }
+  launchedAt         DateTime @default(now()) @map("launched_at")
+  arrivesAt          DateTime @map("arrives_at")
+  resolved           Boolean  @default(false)
+
+  attackerVillage Village @relation("AttackerVillage", fields: [attackerVillageId], references: [id], onDelete: Cascade)
+  defenderVillage Village @relation("DefenderVillage", fields: [defenderVillageId], references: [id], onDelete: Cascade)
+
+  @@index([defenderVillageId, arrivesAt])
+  @@index([resolved, arrivesAt])
+  @@map("attacks")
+}
+
+// ============================================
+// ALLIANCES
+// ============================================
+
+model Alliance {
+  id         String   @id @default(uuid())
+  name       String   @unique
+  tag        String   @unique // 3-4 letter abbreviation
+  founderId  String   @map("founder_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  members AllianceMember[]
+
+  @@map("alliances")
+}
+
+model AllianceMember {
+  id         String   @id @default(uuid())
+  allianceId String   @map("alliance_id")
+  userId     String   @unique @map("user_id")
+  role       String   @default("member") // 'founder' | 'leader' | 'officer' | 'member'
+  joinedAt   DateTime @default(now()) @map("joined_at")
+
+  alliance Alliance @relation(fields: [allianceId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("alliance_members")
+}
+
+// ============================================
+// MESSAGING & REPORTS
+// ============================================
+
+model Message {
+  id          String   @id @default(uuid())
+  senderId    String   @map("sender_id")
+  recipientId String   @map("recipient_id")
+  subject     String
+  body        String
+  read        Boolean  @default(false)
+  sentAt      DateTime @default(now()) @map("sent_at")
+
+  sender    User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  recipient User @relation("ReceivedMessages", fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId, read])
+  @@map("messages")
+}
+
+model Report {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  type      String   // 'battle' | 'scout' | 'trade' | 'reinforcement'
+  data      String   // JSON string: Report-specific data
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@map("reports")
+}
+
+// ============================================
+// GAME STATE (for job processing)
+// ============================================
+
+model GameJob {
+  id           String   @id @default(uuid())
+  type         String   // 'building_complete' | 'field_complete' | 'attack_resolve' | 'troop_training'
+  villageId    String   @map("village_id")
+  data         String   // JSON string: Job-specific data
+  scheduledFor DateTime @map("scheduled_for")
+  processed    Boolean  @default(false)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([processed, scheduledFor])
+  @@map("game_jobs")
+}

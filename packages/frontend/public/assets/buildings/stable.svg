@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Stable - horse barn -->
+  <defs>
+    <linearGradient id="barn" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#CD853F"/>
+      <stop offset="100%" style="stop-color:#8B4513"/>
+    </linearGradient>
+  </defs>
+  <!-- Foundation -->
+  <rect x="4" y="54" width="56" height="4" fill="#606060"/>
+  <!-- Main barn -->
+  <rect x="6" y="30" width="52" height="24" fill="url(#barn)" stroke="#5C4033" stroke-width="1.5"/>
+  <!-- Barn roof -->
+  <polygon points="32,10 62,30 2,30" fill="#8B0000" stroke="#5C0000" stroke-width="1"/>
+  <!-- Hay loft window -->
+  <polygon points="32,16 40,24 24,24" fill="#3D2817"/>
+  <!-- Stable doors (double) -->
+  <rect x="12" y="38" width="14" height="16" fill="#5C4033" stroke="#3D2817" stroke-width="1"/>
+  <rect x="38" y="38" width="14" height="16" fill="#5C4033" stroke="#3D2817" stroke-width="1"/>
+  <!-- Door X patterns -->
+  <line x1="12" y1="38" x2="26" y2="54" stroke="#3D2817" stroke-width="1"/>
+  <line x1="26" y1="38" x2="12" y2="54" stroke="#3D2817" stroke-width="1"/>
+  <line x1="38" y1="38" x2="52" y2="54" stroke="#3D2817" stroke-width="1"/>
+  <line x1="52" y1="38" x2="38" y2="54" stroke="#3D2817" stroke-width="1"/>
+  <!-- Horseshoe emblem -->
+  <path d="M 29 34 Q 26 38 29 42 L 31 42 Q 29 38 31 35 Z" fill="#FFD700"/>
+  <path d="M 35 34 Q 38 38 35 42 L 33 42 Q 35 38 33 35 Z" fill="#FFD700"/>
+  <!-- Hay visible -->
+  <ellipse cx="8" cy="50" rx="3" ry="4" fill="#DAA520"/>
+</svg>
