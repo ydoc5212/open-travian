@@ -1,18 +1,18 @@
 .resourceBar {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   align-items: center;
 }
 
 .resourceItem {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 
 .resourceIcon {
   width: 18px;
-  height: 14px;
+  height: 12px;
   object-fit: contain;
 }
 
@@ -26,18 +26,18 @@
 .resourceValue {
   color: #f5deb3;
   font-weight: bold;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
 }
 
 .resourceCapacity {
   color: #a08060;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
 }
 
 .resourceProduction {
-  font-size: 0.6rem;
+  font-size: 0.7rem;
   font-family: Verdana, Arial, sans-serif;
-  margin-left: 2px;
+  margin-left: 4px;
 }
 
 .resourceProduction.positive {

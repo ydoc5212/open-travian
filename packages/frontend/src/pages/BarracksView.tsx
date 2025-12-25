@@ -4,6 +4,7 @@ import { troopsApi } from '../services/api';
 import { UNIT_DATA, UNIT_IMAGE_IDS } from '@travian/shared';
 import type { Resources } from '@travian/shared';
 import { Timer } from '../components/Timer';
+import { ResourceIcon } from '../components/ResourceIcon';
 import styles from './BarracksView.module.css';
 
 // Helper to get unit image path
@@ -240,19 +241,19 @@ export function BarracksView() {
               <h4>Cost per Unit</h4>
               <div className={styles.costGrid}>
                 <div className={styles.costItem}>
-                  <span className={styles.costIcon} style={{ backgroundColor: '#8B4513' }} />
+                  <ResourceIcon type="lumber" size="small" />
                   <span>{selectedUnitData.cost.lumber}</span>
                 </div>
                 <div className={styles.costItem}>
-                  <span className={styles.costIcon} style={{ backgroundColor: '#CD853F' }} />
+                  <ResourceIcon type="clay" size="small" />
                   <span>{selectedUnitData.cost.clay}</span>
                 </div>
                 <div className={styles.costItem}>
-                  <span className={styles.costIcon} style={{ backgroundColor: '#708090' }} />
+                  <ResourceIcon type="iron" size="small" />
                   <span>{selectedUnitData.cost.iron}</span>
                 </div>
                 <div className={styles.costItem}>
-                  <span className={styles.costIcon} style={{ backgroundColor: '#DAA520' }} />
+                  <ResourceIcon type="crop" size="small" />
                   <span>{selectedUnitData.cost.crop}</span>
                 </div>
               </div>
@@ -281,7 +282,7 @@ export function BarracksView() {
                 <span>Total Cost:</span>
                 <div className={styles.costGrid}>
                   <div className={styles.costItem}>
-                    <span className={styles.costIcon} style={{ backgroundColor: '#8B4513' }} />
+                    <ResourceIcon type="lumber" size="small" />
                     <span
                       className={
                         currentVillage.resources.lumber < selectedUnitData.cost.lumber * quantity
@@ -293,7 +294,7 @@ export function BarracksView() {
                     </span>
                   </div>
                   <div className={styles.costItem}>
-                    <span className={styles.costIcon} style={{ backgroundColor: '#CD853F' }} />
+                    <ResourceIcon type="clay" size="small" />
                     <span
                       className={
                         currentVillage.resources.clay < selectedUnitData.cost.clay * quantity
@@ -305,7 +306,7 @@ export function BarracksView() {
                     </span>
                   </div>
                   <div className={styles.costItem}>
-                    <span className={styles.costIcon} style={{ backgroundColor: '#708090' }} />
+                    <ResourceIcon type="iron" size="small" />
                     <span
                       className={
                         currentVillage.resources.iron < selectedUnitData.cost.iron * quantity
@@ -317,7 +318,7 @@ export function BarracksView() {
                     </span>
                   </div>
                   <div className={styles.costItem}>
-                    <span className={styles.costIcon} style={{ backgroundColor: '#DAA520' }} />
+                    <ResourceIcon type="crop" size="small" />
                     <span
                       className={
                         currentVillage.resources.crop < selectedUnitData.cost.crop * quantity

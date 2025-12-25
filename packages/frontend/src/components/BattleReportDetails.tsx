@@ -1,4 +1,5 @@
 import type { BattleReportData, UnitType } from '@travian/shared';
+import { ResourceIcon } from './ResourceIcon';
 import styles from './BattleReportDetails.module.css';
 
 interface TroopEntry {
@@ -138,19 +139,19 @@ export function BattleReportDetails({ report }: BattleReportDetailsProps) {
           <h4>Resources Plundered</h4>
           <div className={styles.resources}>
             <div className={styles.resource}>
-              <img src="/assets/ui/res2.gif" alt="Wood" />
+              <ResourceIcon type="lumber" />
               <span>{report.loot.lumber}</span>
             </div>
             <div className={styles.resource}>
-              <img src="/assets/ui/res2.gif" alt="Clay" />
+              <ResourceIcon type="clay" />
               <span>{report.loot.clay}</span>
             </div>
             <div className={styles.resource}>
-              <img src="/assets/ui/res2.gif" alt="Iron" />
+              <ResourceIcon type="iron" />
               <span>{report.loot.iron}</span>
             </div>
             <div className={styles.resource}>
-              <img src="/assets/ui/res2.gif" alt="Crop" />
+              <ResourceIcon type="crop" />
               <span>{report.loot.crop}</span>
             </div>
           </div>

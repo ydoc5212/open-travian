@@ -1,4 +1,5 @@
 import type { ScoutReportData, UnitType, BuildingType } from '@travian/shared';
+import { ResourceIcon } from './ResourceIcon';
 import styles from './ScoutReportDetails.module.css';
 
 interface TroopEntry {
@@ -61,19 +62,19 @@ export function ScoutReportDetails({ report }: ScoutReportDetailsProps) {
           <h4>Resources</h4>
           <div className={styles.resourceList}>
             <div className={styles.resourceItem}>
-              <img src="/assets/ui/res2.gif" alt="Wood" />
+              <ResourceIcon type="lumber" />
               <span>Lumber: {report.resources.lumber}</span>
             </div>
             <div className={styles.resourceItem}>
-              <img src="/assets/ui/res2.gif" alt="Clay" />
+              <ResourceIcon type="clay" />
               <span>Clay: {report.resources.clay}</span>
             </div>
             <div className={styles.resourceItem}>
-              <img src="/assets/ui/res2.gif" alt="Iron" />
+              <ResourceIcon type="iron" />
               <span>Iron: {report.resources.iron}</span>
             </div>
             <div className={styles.resourceItem}>
-              <img src="/assets/ui/res2.gif" alt="Crop" />
+              <ResourceIcon type="crop" />
               <span>Crop: {report.resources.crop}</span>
             </div>
           </div>

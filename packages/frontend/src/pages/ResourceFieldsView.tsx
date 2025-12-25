@@ -5,6 +5,7 @@ import { resourceApi } from '../services/api';
 import { RESOURCE_FIELD_DATA, calculateCostMultiplier } from '@travian/shared';
 import type { ResourceFieldType, Resources } from '@travian/shared';
 import { Timer } from '../components/Timer';
+import { ResourceIcon } from '../components/ResourceIcon';
 import styles from './ResourceFieldsView.module.css';
 
 // Travian f1.jpg resource field layout positions (4-4-4-6 village type)
@@ -181,25 +182,25 @@ export function ResourceFieldsView() {
                         return (
                           <>
                             <div className={styles.costItem}>
-                              <span className={styles.costIcon} style={{ backgroundColor: '#8B4513' }} />
+                              <ResourceIcon type="lumber" size="small" />
                               <span className={currentVillage.resources.lumber < cost.lumber ? styles.notEnough : ''}>
                                 {cost.lumber.toLocaleString()}
                               </span>
                             </div>
                             <div className={styles.costItem}>
-                              <span className={styles.costIcon} style={{ backgroundColor: '#CD853F' }} />
+                              <ResourceIcon type="clay" size="small" />
                               <span className={currentVillage.resources.clay < cost.clay ? styles.notEnough : ''}>
                                 {cost.clay.toLocaleString()}
                               </span>
                             </div>
                             <div className={styles.costItem}>
-                              <span className={styles.costIcon} style={{ backgroundColor: '#708090' }} />
+                              <ResourceIcon type="iron" size="small" />
                               <span className={currentVillage.resources.iron < cost.iron ? styles.notEnough : ''}>
                                 {cost.iron.toLocaleString()}
                               </span>
                             </div>
                             <div className={styles.costItem}>
-                              <span className={styles.costIcon} style={{ backgroundColor: '#DAA520' }} />
+                              <ResourceIcon type="crop" size="small" />
                               <span className={currentVillage.resources.crop < cost.crop ? styles.notEnough : ''}>
                                 {cost.crop.toLocaleString()}
                               </span>

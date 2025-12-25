@@ -1,0 +1,21 @@
+.icon {
+  display: inline-block;
+  vertical-align: middle;
+  object-fit: contain;
+}
+
+/* TravianZ resource icons are 18x12 */
+.small {
+  width: 14px;
+  height: 10px;
+}
+
+.medium {
+  width: 18px;
+  height: 12px;
+}
+
+.large {
+  width: 24px;
+  height: 16px;
+}

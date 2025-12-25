@@ -5,6 +5,7 @@ import { buildingApi } from '../services/api';
 import { BUILDING_DATA, calculateCostMultiplier } from '@travian/shared';
 import type { BuildingType, Resources } from '@travian/shared';
 import { Timer } from '../components/Timer';
+import { ResourceIcon, ResourceType } from '../components/ResourceIcon';
 import styles from './VillageView.module.css';
 
 // Travian bg0.jpg village center building slot positions
@@ -280,18 +281,18 @@ function CostDisplay({
   resources: Resources;
   compact?: boolean;
 }) {
-  const items = [
-    { type: 'lumber', value: cost.lumber, current: resources.lumber, color: '#8B4513' },
-    { type: 'clay', value: cost.clay, current: resources.clay, color: '#CD853F' },
-    { type: 'iron', value: cost.iron, current: resources.iron, color: '#708090' },
-    { type: 'crop', value: cost.crop, current: resources.crop, color: '#DAA520' },
+  const items: { type: ResourceType; value: number; current: number }[] = [
+    { type: 'lumber', value: cost.lumber, current: resources.lumber },
+    { type: 'clay', value: cost.clay, current: resources.clay },
+    { type: 'iron', value: cost.iron, current: resources.iron },
+    { type: 'crop', value: cost.crop, current: resources.crop },
   ];
 
   return (
     <div className={compact ? styles.costGridCompact : styles.costGrid}>
       {items.map((item) => (
         <div key={item.type} className={styles.costItem}>
-          <span className={styles.costIcon} style={{ backgroundColor: item.color }} />
+          <ResourceIcon type={item.type} size="small" />
           <span className={item.current < item.value ? styles.notEnough : ''}>
             {item.value.toLocaleString()}
           </span>
