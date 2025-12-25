@@ -67,6 +67,7 @@ router.get('/:villageId', async (req: AuthRequest, res: Response) => {
         troops: {
           where: { status: 'home' },
         },
+        ownedOases: true,
       },
     });
 
@@ -115,6 +116,18 @@ router.get('/:villageId', async (req: AuthRequest, res: Response) => {
             unitType: troop.unitType,
             quantity: troop.quantity,
           })),
+          ownedOases: village.ownedOases.map((oasis) => {
+            // Parse oasis type to get resource and bonus
+            const match = oasis.type.match(/^(lumber|clay|iron|crop)(\d+)$/);
+            return {
+              id: oasis.id,
+              coordinates: { x: oasis.xCoord, y: oasis.yCoord },
+              type: oasis.type,
+              resourceType: match ? match[1] : 'unknown',
+              bonus: match ? parseInt(match[2]) : 0,
+              conqueredAt: oasis.conqueredAt,
+            };
+          }),
         },
       },
     });

@@ -160,6 +160,12 @@ export function GameLayout() {
           Rally Point
         </NavLink>
         <NavLink
+          to="/hero"
+          className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}
+        >
+          Hero
+        </NavLink>
+        <NavLink
           to="/map"
           className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}
         >
@@ -170,6 +176,12 @@ export function GameLayout() {
           className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}
         >
           Reports
+        </NavLink>
+        <NavLink
+          to="/alliance"
+          className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}
+        >
+          Alliance
         </NavLink>
       </nav>
 

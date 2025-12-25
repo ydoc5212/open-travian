@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useGameStore } from '../stores/gameStore';
 import { troopsApi, combatApi } from '../services/api';
-import { UNIT_DATA, calculateDistance } from '@travian/shared';
+import { UNIT_DATA } from '@travian/shared';
 import { Timer } from '../components/Timer';
 import styles from './RallyPointView.module.css';
 
@@ -40,7 +40,7 @@ export function RallyPointView() {
   const [targetX, setTargetX] = useState('');
   const [targetY, setTargetY] = useState('');
   const [targetInfo, setTargetInfo] = useState<TargetInfo | null>(null);
-  const [attackType, setAttackType] = useState<'attack' | 'raid'>('raid');
+  const [attackType, setAttackType] = useState<'attack' | 'raid' | 'reinforcement'>('raid');
   const [incomingAttacks, setIncomingAttacks] = useState<Attack[]>([]);
   const [outgoingAttacks, setOutgoingAttacks] = useState<Attack[]>([]);
   const [isSending, setIsSending] = useState(false);
@@ -87,6 +87,11 @@ export function RallyPointView() {
     try {
       const response = await combatApi.getTarget(x, y);
       setTargetInfo(response.data);
+
+      // Auto-select reinforcement if targeting own village
+      if (response.data.village.isOwnVillage) {
+        setAttackType('reinforcement');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to find target');
       setTargetInfo(null);
@@ -232,58 +237,71 @@ export function RallyPointView() {
 
                 {targetInfo && (
                   <div className={styles.targetInfo}>
-                    {targetInfo.village.isOwnVillage ? (
-                      <div className="alert alert-warning">
-                        This is your own village!
-                      </div>
-                    ) : (
-                      <>
-                        <div className={styles.targetDetails}>
-                          <span className={styles.targetName}>{targetInfo.village.name}</span>
-                          <span className={styles.targetOwner}>
-                            ({targetInfo.village.ownerName} - {targetInfo.village.ownerTribe})
-                          </span>
-                        </div>
-                        <div className={styles.targetStats}>
-                          <span>Population: {targetInfo.village.population}</span>
-                          <span>Distance: {targetInfo.distance} fields</span>
-                        </div>
-                      </>
-                    )}
+                    <div className={styles.targetDetails}>
+                      <span className={styles.targetName}>{targetInfo.village.name}</span>
+                      <span className={styles.targetOwner}>
+                        ({targetInfo.village.ownerName} - {targetInfo.village.ownerTribe})
+                      </span>
+                      {targetInfo.village.isOwnVillage && (
+                        <span className={styles.ownVillageBadge}>Your Village</span>
+                      )}
+                    </div>
+                    <div className={styles.targetStats}>
+                      <span>Population: {targetInfo.village.population}</span>
+                      <span>Distance: {targetInfo.distance} fields</span>
+                    </div>
                   </div>
                 )}
               </div>
 
               {/* Attack Type */}
-              {targetInfo && !targetInfo.village.isOwnVillage && (
+              {targetInfo && (
                 <>
                   <div className={styles.attackTypeSection}>
-                    <h4>Attack Type</h4>
+                    <h4>Mission Type</h4>
                     <div className={styles.attackTypeOptions}>
-                      <label className={styles.radioLabel}>
-                        <input
-                          type="radio"
-                          name="attackType"
-                          value="raid"
-                          checked={attackType === 'raid'}
-                          onChange={() => setAttackType('raid')}
-                        />
-                        <span className={styles.radioText}>
-                          <strong>Raid</strong> - Focus on stealing resources, fewer losses
-                        </span>
-                      </label>
-                      <label className={styles.radioLabel}>
-                        <input
-                          type="radio"
-                          name="attackType"
-                          value="attack"
-                          checked={attackType === 'attack'}
-                          onChange={() => setAttackType('attack')}
-                        />
-                        <span className={styles.radioText}>
-                          <strong>Attack</strong> - Full assault, maximum damage to defenders
-                        </span>
-                      </label>
+                      {!targetInfo.village.isOwnVillage && (
+                        <>
+                          <label className={styles.radioLabel}>
+                            <input
+                              type="radio"
+                              name="attackType"
+                              value="raid"
+                              checked={attackType === 'raid'}
+                              onChange={() => setAttackType('raid')}
+                            />
+                            <span className={styles.radioText}>
+                              <strong>Raid</strong> - Focus on stealing resources, fewer losses
+                            </span>
+                          </label>
+                          <label className={styles.radioLabel}>
+                            <input
+                              type="radio"
+                              name="attackType"
+                              value="attack"
+                              checked={attackType === 'attack'}
+                              onChange={() => setAttackType('attack')}
+                            />
+                            <span className={styles.radioText}>
+                              <strong>Attack</strong> - Full assault, maximum damage to defenders
+                            </span>
+                          </label>
+                        </>
+                      )}
+                      {targetInfo.village.isOwnVillage && (
+                        <label className={styles.radioLabel}>
+                          <input
+                            type="radio"
+                            name="attackType"
+                            value="reinforcement"
+                            checked={attackType === 'reinforcement'}
+                            onChange={() => setAttackType('reinforcement')}
+                          />
+                          <span className={styles.radioText}>
+                            <strong>Reinforcement</strong> - Send troops to defend this village
+                          </span>
+                        </label>
+                      )}
                     </div>
                   </div>
 
@@ -343,7 +361,11 @@ export function RallyPointView() {
                         Object.values(selectedTroops).every((v) => v === 0)
                       }
                     >
-                      {isSending ? 'Sending...' : `Send ${attackType === 'raid' ? 'Raid' : 'Attack'}`}
+                      {isSending ? 'Sending...' : `Send ${
+                        attackType === 'raid' ? 'Raid' :
+                        attackType === 'attack' ? 'Attack' :
+                        'Reinforcement'
+                      }`}
                     </button>
                   </div>
                 </>

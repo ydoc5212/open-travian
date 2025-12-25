@@ -71,7 +71,7 @@ router.post('/attack', async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ success: false, error: 'Missing required fields' });
     }
 
-    if (!['attack', 'raid'].includes(attackType)) {
+    if (!['attack', 'raid', 'reinforcement'].includes(attackType)) {
       return res.status(400).json({ success: false, error: 'Invalid attack type' });
     }
 
@@ -99,9 +99,14 @@ router.post('/attack', async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ success: false, error: 'Target village not found' });
     }
 
-    // Can't attack own village
-    if (targetVillage.userId === req.userId) {
+    // Can't attack own village (unless it's a reinforcement)
+    if (targetVillage.userId === req.userId && attackType !== 'reinforcement') {
       return res.status(400).json({ success: false, error: 'Cannot attack your own village' });
+    }
+
+    // Can only reinforce own village
+    if (targetVillage.userId !== req.userId && attackType === 'reinforcement') {
+      return res.status(400).json({ success: false, error: 'Can only reinforce your own villages' });
     }
 
     // Validate troop availability
@@ -173,44 +178,61 @@ router.post('/attack', async (req: AuthRequest, res: Response) => {
         }
       }
 
-      // Create attacking troop entries
+      // Create attacking/reinforcing troop entries
+      const troopStatus = attackType === 'reinforcement' ? 'reinforcing' : 'attacking';
       for (const troopOrder of validTroops) {
         await tx.troop.create({
           data: {
             villageId: fromVillageId,
             unitType: troopOrder.unitType,
             quantity: troopOrder.quantity,
-            status: 'attacking',
+            status: troopStatus,
             destinationVillageId: targetVillage.id,
             arrivesAt,
           },
         });
       }
 
-      // Create attack record
-      await tx.attack.create({
-        data: {
-          attackerVillageId: fromVillageId,
-          defenderVillageId: targetVillage.id,
-          attackType: attackType as AttackType,
-          troops: JSON.stringify(validTroops),
-          arrivesAt,
-        },
-      });
-
-      // Schedule attack resolution job
-      await tx.gameJob.create({
-        data: {
-          type: 'attack_resolve',
-          villageId: targetVillage.id,
-          data: JSON.stringify({
+      // For reinforcements, schedule arrival job instead of attack resolution
+      if (attackType === 'reinforcement') {
+        await tx.gameJob.create({
+          data: {
+            type: 'reinforcement_arrive',
+            villageId: targetVillage.id,
+            data: JSON.stringify({
+              fromVillageId,
+              toVillageId: targetVillage.id,
+              troops: validTroops,
+            }),
+            scheduledFor: arrivesAt,
+          },
+        });
+      } else {
+        // Create attack record for attacks/raids
+        await tx.attack.create({
+          data: {
             attackerVillageId: fromVillageId,
             defenderVillageId: targetVillage.id,
-            attackType,
-          }),
-          scheduledFor: arrivesAt,
-        },
-      });
+            attackType: attackType as AttackType,
+            troops: JSON.stringify(validTroops),
+            arrivesAt,
+          },
+        });
+
+        // Schedule attack resolution job
+        await tx.gameJob.create({
+          data: {
+            type: 'attack_resolve',
+            villageId: targetVillage.id,
+            data: JSON.stringify({
+              attackerVillageId: fromVillageId,
+              defenderVillageId: targetVillage.id,
+              attackType,
+            }),
+            scheduledFor: arrivesAt,
+          },
+        });
+      }
     });
 
     res.json({

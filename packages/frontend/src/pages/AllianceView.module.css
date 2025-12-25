@@ -1,0 +1,245 @@
+.container {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.closeAlert {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0 8px;
+  margin-left: 12px;
+  opacity: 0.7;
+}
+
+.closeAlert:hover {
+  opacity: 1;
+}
+
+/* Not in alliance */
+.notInAlliance {
+  max-width: 600px;
+  margin: 40px auto;
+}
+
+.notInText {
+  margin-bottom: 16px;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.createForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.formActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+/* Alliance content */
+.allianceContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.allianceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.allianceInfo {
+  flex: 1;
+}
+
+.allianceName {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+  color: var(--color-brown-dark);
+}
+
+.allianceMeta {
+  display: flex;
+  gap: 12px;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  align-items: center;
+}
+
+.allianceActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Invite form */
+.inviteForm {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-brown-medium);
+}
+
+.inviteForm .input {
+  flex: 1;
+  font-size: 0.75rem;
+  padding: 6px 10px;
+}
+
+/* Members table */
+.membersTable {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 40px 1fr 80px 120px 100px 100px;
+  gap: 8px;
+  padding: 8px;
+  background: var(--color-brown-light);
+  color: var(--color-parchment);
+  font-weight: bold;
+  font-size: 0.7rem;
+  border-radius: 2px;
+}
+
+.memberRow {
+  display: grid;
+  grid-template-columns: 40px 1fr 80px 120px 100px 100px;
+  gap: 8px;
+  padding: 8px;
+  background: var(--color-parchment-light);
+  border-bottom: 1px solid var(--color-tan);
+  font-size: 0.75rem;
+  align-items: center;
+}
+
+.memberRow:hover {
+  background: var(--color-parchment);
+}
+
+.colRank {
+  text-align: center;
+  font-weight: bold;
+  color: var(--color-text-muted);
+}
+
+.colPlayer {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.colTribe {
+  text-transform: capitalize;
+  color: var(--color-text-muted);
+}
+
+.colRole {
+  display: flex;
+  align-items: center;
+}
+
+.colPopulation {
+  text-align: right;
+  font-weight: 500;
+}
+
+.colActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+/* Role badges */
+.roleFounder,
+.roleLeader,
+.roleOfficer,
+.roleMember {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.roleFounder {
+  background: linear-gradient(180deg, #FFD700 0%, #DAA520 100%);
+  color: var(--color-brown-dark);
+}
+
+.roleLeader {
+  background: linear-gradient(180deg, #C0C0C0 0%, #A0A0A0 100%);
+  color: var(--color-brown-dark);
+}
+
+.roleOfficer {
+  background: linear-gradient(180deg, #CD7F32 0%, #B5651D 100%);
+  color: white;
+}
+
+.roleMember {
+  background: var(--color-stone-light);
+  color: var(--color-text);
+}
+
+/* Role select */
+.roleSelect {
+  padding: 4px 8px;
+  border: 1px solid var(--color-brown-medium);
+  border-radius: 2px;
+  background: var(--color-cream);
+  font-size: 0.7rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.roleSelect:focus {
+  outline: none;
+  border-color: var(--color-green-dark);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .tableHeader,
+  .memberRow {
+    grid-template-columns: 30px 1fr 60px 80px 80px;
+    font-size: 0.65rem;
+  }
+
+  .colActions {
+    grid-column: span 5;
+    justify-content: flex-start;
+    padding-top: 4px;
+  }
+
+  .allianceHeader {
+    flex-direction: column;
+  }
+
+  .allianceActions {
+    width: 100%;
+  }
+}

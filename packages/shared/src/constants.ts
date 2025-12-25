@@ -776,16 +776,18 @@ export function calculateCostMultiplier(level: number): number {
 
 /**
  * Calculate the time for construction at a given level
- * Factors in Main Building level for reduction
+ * Factors in Main Building level for reduction and Plus account bonus
  */
 export function calculateConstructionTime(
   baseTime: number,
   targetLevel: number,
-  mainBuildingLevel: number
+  mainBuildingLevel: number,
+  hasPlusAccount: boolean = false
 ): number {
   const levelMultiplier = Math.pow(1.28, targetLevel - 1);
   const mbReduction = 1 - mainBuildingLevel * 0.03; // 3% reduction per MB level
-  const baseTimeWithLevel = baseTime * levelMultiplier * Math.max(0.5, mbReduction);
+  const plusBonus = hasPlusAccount ? 0.75 : 1.0; // 25% faster with Plus (multiply by 0.75)
+  const baseTimeWithLevel = baseTime * levelMultiplier * Math.max(0.5, mbReduction) * plusBonus;
 
   // Apply game speed multiplier
   return Math.floor(baseTimeWithLevel / GAME_CONFIG.SPEED_MULTIPLIER);

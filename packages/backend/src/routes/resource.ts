@@ -77,21 +77,38 @@ router.post('/village/:villageId/field/:slot/upgrade', async (req: AuthRequest, 
 
     const village = await prisma.village.findFirst({
       where: { id: villageId, userId: req.userId },
-      include: { resourceFields: true, buildings: true },
+      include: { resourceFields: true, buildings: true, user: true },
     });
 
     if (!village) {
       return res.status(404).json({ success: false, error: 'Village not found' });
     }
 
-    // Check if there's already a construction in progress (fields share queue with buildings in some versions)
-    // For classic Travian, Romans can build field + building simultaneously
-    // For simplicity, we'll allow one field upgrade at a time
+    // Check if there's already a construction in progress
     const fieldInProgress = village.resourceFields.find((f) => f.upgradeEndsAt !== null);
-    if (fieldInProgress) {
+    const buildingInProgress = village.buildings.find((b) => b.upgradeEndsAt !== null);
+    const hasActiveConstruction = fieldInProgress || buildingInProgress;
+
+    // Check Plus account status
+    const now = new Date();
+    const hasPlusAccount = !!(village.user.plusAccountUntil && village.user.plusAccountUntil > now);
+
+    // Check current queue size
+    const queueCount = await prisma.buildingQueue.count({ where: { villageId } });
+
+    // If construction in progress and no Plus, reject
+    if (hasActiveConstruction && !hasPlusAccount) {
       return res.status(400).json({
         success: false,
-        error: 'Another resource field upgrade is in progress',
+        error: 'Another construction is already in progress. Upgrade to Plus to use building queue!',
+      });
+    }
+
+    // If queue already has 1 item (max for Plus), reject
+    if (queueCount >= 1 && hasPlusAccount) {
+      return res.status(400).json({
+        success: false,
+        error: 'Building queue is full (max 2 items with Plus account)',
       });
     }
 
@@ -124,6 +141,9 @@ router.post('/village/:villageId/field/:slot/upgrade', async (req: AuthRequest, 
       });
     }
 
+    // Deduct resources immediately (whether starting now or queuing)
+    await deductResources(villageId, cost);
+
     // Get Main Building level for time reduction
     const mainBuilding = village.buildings.find((b) => b.type === 'main_building');
     const mainBuildingLevel = mainBuilding?.level || 0;
@@ -132,43 +152,67 @@ router.post('/village/:villageId/field/:slot/upgrade', async (req: AuthRequest, 
     const constructionTime = calculateConstructionTime(
       fieldData.baseTime,
       targetLevel,
-      mainBuildingLevel
+      mainBuildingLevel,
+      hasPlusAccount
     );
 
-    const now = new Date();
-    const endsAt = new Date(now.getTime() + constructionTime * 1000);
+    if (!hasActiveConstruction) {
+      // Start construction immediately
+      const endsAt = new Date(now.getTime() + constructionTime * 1000);
 
-    // Deduct resources and start upgrade
-    await deductResources(villageId, cost);
+      await prisma.resourceField.update({
+        where: { villageId_slot: { villageId, slot: slotNum } },
+        data: {
+          upgradeStartedAt: now,
+          upgradeEndsAt: endsAt,
+        },
+      });
 
-    await prisma.resourceField.update({
-      where: { villageId_slot: { villageId, slot: slotNum } },
-      data: {
-        upgradeStartedAt: now,
-        upgradeEndsAt: endsAt,
-      },
-    });
+      // Schedule job for completion
+      await prisma.gameJob.create({
+        data: {
+          type: 'field_complete',
+          villageId,
+          data: JSON.stringify({ slot: slotNum, targetLevel }),
+          scheduledFor: endsAt,
+        },
+      });
 
-    // Schedule job for completion
-    await prisma.gameJob.create({
-      data: {
-        type: 'field_complete',
-        villageId,
-        data: JSON.stringify({ slot: slotNum, targetLevel }),
-        scheduledFor: endsAt,
-      },
-    });
+      res.json({
+        success: true,
+        data: {
+          slot: slotNum,
+          type: field.type,
+          targetLevel,
+          endsAt: endsAt.toISOString(),
+          constructionTime,
+          queued: false,
+        },
+      });
+    } else {
+      // Add to queue
+      await prisma.buildingQueue.create({
+        data: {
+          villageId,
+          slot: slotNum,
+          isField: true,
+          buildingType: null,
+          targetLevel,
+          position: 1, // Queued position
+        },
+      });
 
-    res.json({
-      success: true,
-      data: {
-        slot: slotNum,
-        type: field.type,
-        targetLevel,
-        endsAt: endsAt.toISOString(),
-        constructionTime,
-      },
-    });
+      res.json({
+        success: true,
+        data: {
+          slot: slotNum,
+          type: field.type,
+          targetLevel,
+          constructionTime,
+          queued: true,
+        },
+      });
+    }
   } catch (error) {
     console.error('Error upgrading resource field:', error);
     res.status(500).json({ success: false, error: 'Failed to upgrade resource field' });

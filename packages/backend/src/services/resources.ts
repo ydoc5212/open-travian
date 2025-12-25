@@ -34,6 +34,7 @@ export async function calculateVillageResources(villageId: string): Promise<Vill
       resourceFields: true,
       buildings: true,
       troops: { where: { status: 'home' } },
+      ownedOases: true,
     },
   });
 
@@ -60,6 +61,35 @@ export async function calculateVillageResources(villageId: string): Promise<Vill
         const hourlyProduction = calculateProduction(fieldData.baseProduction, field.level);
         production[fieldData.produces] += hourlyProduction;
       }
+    }
+  }
+
+  // Apply oasis bonuses (maximum 3 oases per village)
+  const oasesToApply = village.ownedOases.slice(0, 3);
+  const oasisBonuses: Record<ResourceType, number> = {
+    lumber: 0,
+    clay: 0,
+    iron: 0,
+    crop: 0,
+  };
+
+  for (const oasis of oasesToApply) {
+    // Parse oasis type to get resource and bonus percentage
+    // Format: 'lumber25', 'lumber50', 'clay25', 'clay50', etc.
+    const match = oasis.type.match(/^(lumber|clay|iron|crop)(\d+)$/);
+    if (match) {
+      const resourceType = match[1] as ResourceType;
+      const bonusPercent = parseInt(match[2]);
+      oasisBonuses[resourceType] += bonusPercent;
+    }
+  }
+
+  // Apply oasis bonuses to production
+  for (const resourceType of Object.keys(production) as ResourceType[]) {
+    if (oasisBonuses[resourceType] > 0) {
+      const baseProduction = production[resourceType];
+      const bonusProduction = (baseProduction * oasisBonuses[resourceType]) / 100;
+      production[resourceType] = baseProduction + bonusProduction;
     }
   }
 

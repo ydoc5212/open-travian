@@ -63,7 +63,7 @@ router.get('/:reportId', async (req: AuthRequest, res: Response) => {
 });
 
 // Mark report as read
-router.post('/:reportId/read', async (req: AuthRequest, res: Response) => {
+router.put('/:reportId/read', async (req: AuthRequest, res: Response) => {
   try {
     const { reportId } = req.params;
 
@@ -84,6 +84,30 @@ router.post('/:reportId/read', async (req: AuthRequest, res: Response) => {
   } catch (error) {
     console.error('Error marking report as read:', error);
     res.status(500).json({ success: false, error: 'Failed to mark report as read' });
+  }
+});
+
+// Delete report
+router.delete('/:reportId', async (req: AuthRequest, res: Response) => {
+  try {
+    const { reportId } = req.params;
+
+    const report = await prisma.report.findFirst({
+      where: { id: reportId, userId: req.userId },
+    });
+
+    if (!report) {
+      return res.status(404).json({ success: false, error: 'Report not found' });
+    }
+
+    await prisma.report.delete({
+      where: { id: reportId },
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting report:', error);
+    res.status(500).json({ success: false, error: 'Failed to delete report' });
   }
 });
 

@@ -1,0 +1,15 @@
+.reportIcon {
+  width: 16px;
+  height: 16px;
+  background-repeat: no-repeat;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.reportIcon.unread {
+  filter: brightness(1.2);
+}
+
+.reportIcon.read {
+  opacity: 0.6;
+}

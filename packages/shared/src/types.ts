@@ -143,7 +143,7 @@ export interface TroopData {
   arrivesAt?: Date;
 }
 
-export type AttackType = 'attack' | 'raid' | 'scout';
+export type AttackType = 'attack' | 'raid' | 'scout' | 'reinforcement';
 
 export interface AttackData {
   id: string;
@@ -165,6 +165,70 @@ export interface BattleReport {
   defenderLosses: { unitType: UnitType; lost: number }[];
   loot: Resources;
   winner: 'attacker' | 'defender';
+  createdAt: Date;
+}
+
+// ============================================
+// REPORTS
+// ============================================
+
+export type ReportType = 'battle' | 'scout' | 'trade' | 'reinforcement';
+
+export interface BattleReportData {
+  attackerVillageName: string;
+  attackerVillageCoords: Coordinates;
+  attackerUsername: string;
+  defenderVillageName: string;
+  defenderVillageCoords: Coordinates;
+  defenderUsername: string;
+  attackType: 'attack' | 'raid';
+  attackerTroops: { unitType: UnitType; sent: number; lost: number }[];
+  defenderTroops: { unitType: UnitType; defending: number; lost: number }[];
+  loot: Resources;
+  winner: 'attacker' | 'defender';
+  timestamp: Date;
+}
+
+export interface ScoutReportData {
+  targetVillageName: string;
+  targetVillageCoords: Coordinates;
+  targetUsername: string;
+  scoutingVillageName: string;
+  scoutingVillageCoords: Coordinates;
+  resources: Resources;
+  troops: { unitType: UnitType; quantity: number }[];
+  defenses: { type: BuildingType; level: number }[];
+  scoutsLost: number;
+  timestamp: Date;
+}
+
+export interface TradeReportData {
+  fromVillageName: string;
+  fromVillageCoords: Coordinates;
+  toVillageName: string;
+  toVillageCoords: Coordinates;
+  resources: Resources;
+  timestamp: Date;
+}
+
+export interface ReinforcementReportData {
+  fromVillageName: string;
+  fromVillageCoords: Coordinates;
+  fromUsername: string;
+  toVillageName: string;
+  toVillageCoords: Coordinates;
+  troops: { unitType: UnitType; quantity: number }[];
+  timestamp: Date;
+}
+
+export type ReportData = BattleReportData | ScoutReportData | TradeReportData | ReinforcementReportData;
+
+export interface Report {
+  id: string;
+  userId: string;
+  type: ReportType;
+  data: ReportData;
+  read: boolean;
   createdAt: Date;
 }
 

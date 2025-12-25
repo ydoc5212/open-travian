@@ -1,0 +1,305 @@
+.container {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f5e6d3;
+  border: 1px solid #5c4033;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #5c4033;
+}
+
+.resourceDisplay {
+  display: flex;
+  gap: 16px;
+}
+
+.resourceItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  font-weight: bold;
+}
+
+.resourceIcon {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  border-bottom: 2px solid #5c4033;
+}
+
+.tab,
+.tabActive {
+  padding: 8px 16px;
+  background: #d4a574;
+  border: 1px solid #5c4033;
+  border-bottom: none;
+  cursor: pointer;
+  font-family: Verdana, Arial, sans-serif;
+  font-size: 0.75rem;
+  transition: background 0.2s;
+}
+
+.tab:hover {
+  background: #c49464;
+}
+
+.tabActive {
+  background: #f5e6d3;
+  font-weight: bold;
+}
+
+.loading {
+  text-align: center;
+  padding: 32px;
+  color: #8B7355;
+  font-size: 0.875rem;
+}
+
+.noOffers,
+.noTrades {
+  text-align: center;
+  padding: 32px;
+  color: #8B7355;
+  font-size: 0.875rem;
+}
+
+.offersList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.offerCard {
+  background: #fff8dc;
+  border: 1px solid #d4a574;
+  padding: 12px;
+  border-radius: 4px;
+}
+
+.offerHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.75rem;
+}
+
+.villageName {
+  font-weight: bold;
+  color: #5c4033;
+}
+
+.coordinates {
+  color: #8B7355;
+  font-family: 'Courier New', monospace;
+}
+
+.owner {
+  color: #8B7355;
+  font-style: italic;
+}
+
+.offerBody {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 12px 0;
+}
+
+.offerSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: 0.7rem;
+  color: #8B7355;
+  text-transform: uppercase;
+}
+
+.resource {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resourceAmount {
+  font-size: 0.875rem;
+  font-weight: bold;
+}
+
+.arrow {
+  font-size: 1.5rem;
+  color: #5c4033;
+}
+
+.offerFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #d4a574;
+}
+
+.expires {
+  font-size: 0.7rem;
+  color: #8B7355;
+}
+
+.createForm {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.formSection h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #5c4033;
+}
+
+.formRow {
+  display: flex;
+  gap: 16px;
+}
+
+.formGroup {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.select,
+.input {
+  padding: 8px 12px;
+  border: 2px solid #8B7355;
+  border-radius: 4px;
+  background: #fff8dc;
+  color: #2C1810;
+  font-family: Verdana, Arial, sans-serif;
+  font-size: 0.75rem;
+}
+
+.select:focus,
+.input:focus {
+  outline: none;
+  border-color: #5D7A3E;
+}
+
+.resourcePreview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: #f5e6d3;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.tradeSummary {
+  padding: 12px;
+  background: #f5e6d3;
+  border: 1px solid #d4a574;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.tradeSummary p {
+  margin: 4px 0;
+}
+
+.note {
+  color: #8B7355;
+  font-style: italic;
+}
+
+.tradesContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.tradesList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tradeCard {
+  background: #fff8dc;
+  border: 1px solid #d4a574;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.tradeInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.tradeResources {
+  display: flex;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.tradeTime {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #d4a574;
+  color: #8B7355;
+  font-size: 0.7rem;
+}
+
+@media (max-width: 768px) {
+  .tradesContainer {
+    grid-template-columns: 1fr;
+  }
+
+  .formRow {
+    flex-direction: column;
+  }
+
+  .offerBody {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .arrow {
+    transform: rotate(90deg);
+  }
+}

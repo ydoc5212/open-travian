@@ -101,6 +101,15 @@
   color: var(--color-text-muted);
 }
 
+.ownVillageBadge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  background: var(--color-green-dark);
+  color: white;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
 .targetStats {
   display: flex;
   gap: 24px;

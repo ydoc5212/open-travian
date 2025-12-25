@@ -153,7 +153,7 @@ router.post('/village/:villageId/slot/:slot/upgrade', async (req: AuthRequest, r
 
     const village = await prisma.village.findFirst({
       where: { id: villageId, userId: req.userId },
-      include: { buildings: true },
+      include: { buildings: true, resourceFields: true, user: true },
     });
 
     if (!village) {
@@ -162,10 +162,29 @@ router.post('/village/:villageId/slot/:slot/upgrade', async (req: AuthRequest, r
 
     // Check if there's already a construction in progress
     const constructionInProgress = village.buildings.find((b) => b.upgradeEndsAt !== null);
-    if (constructionInProgress) {
+    const fieldInProgress = village.resourceFields.find((f) => f.upgradeEndsAt !== null);
+    const hasActiveConstruction = constructionInProgress || fieldInProgress;
+
+    // Check Plus account status
+    const now = new Date();
+    const hasPlusAccount = !!(village.user.plusAccountUntil && village.user.plusAccountUntil > now);
+
+    // Check current queue size
+    const queueCount = await prisma.buildingQueue.count({ where: { villageId } });
+
+    // If construction in progress and no Plus, reject
+    if (hasActiveConstruction && !hasPlusAccount) {
       return res.status(400).json({
         success: false,
-        error: 'Another construction is already in progress',
+        error: 'Another construction is already in progress. Upgrade to Plus to use building queue!',
+      });
+    }
+
+    // If queue already has 1 item (max for Plus), reject
+    if (queueCount >= 1 && hasPlusAccount) {
+      return res.status(400).json({
+        success: false,
+        error: 'Building queue is full (max 2 items with Plus account)',
       });
     }
 
@@ -230,6 +249,9 @@ router.post('/village/:villageId/slot/:slot/upgrade', async (req: AuthRequest, r
       });
     }
 
+    // Deduct resources immediately (whether starting now or queuing)
+    await deductResources(villageId, cost);
+
     // Get Main Building level for time reduction
     const mainBuilding = village.buildings.find((b) => b.type === 'main_building');
     const mainBuildingLevel = mainBuilding?.level || 0;
@@ -238,44 +260,68 @@ router.post('/village/:villageId/slot/:slot/upgrade', async (req: AuthRequest, r
     const constructionTime = calculateConstructionTime(
       buildingData.baseTime,
       targetLevel,
-      mainBuildingLevel
+      mainBuildingLevel,
+      hasPlusAccount
     );
 
-    const now = new Date();
-    const endsAt = new Date(now.getTime() + constructionTime * 1000);
+    if (!hasActiveConstruction) {
+      // Start construction immediately
+      const endsAt = new Date(now.getTime() + constructionTime * 1000);
 
-    // Deduct resources and start construction
-    await deductResources(villageId, cost);
+      await prisma.building.update({
+        where: { villageId_slot: { villageId, slot: slotNum } },
+        data: {
+          type: targetType,
+          upgradeStartedAt: now,
+          upgradeEndsAt: endsAt,
+        },
+      });
 
-    await prisma.building.update({
-      where: { villageId_slot: { villageId, slot: slotNum } },
-      data: {
-        type: targetType,
-        upgradeStartedAt: now,
-        upgradeEndsAt: endsAt,
-      },
-    });
+      // Schedule job for completion
+      await prisma.gameJob.create({
+        data: {
+          type: 'building_complete',
+          villageId,
+          data: JSON.stringify({ slot: slotNum, targetLevel }),
+          scheduledFor: endsAt,
+        },
+      });
 
-    // Schedule job for completion
-    await prisma.gameJob.create({
-      data: {
-        type: 'building_complete',
-        villageId,
-        data: JSON.stringify({ slot: slotNum, targetLevel }),
-        scheduledFor: endsAt,
-      },
-    });
+      res.json({
+        success: true,
+        data: {
+          slot: slotNum,
+          type: targetType,
+          targetLevel,
+          endsAt: endsAt.toISOString(),
+          constructionTime,
+          queued: false,
+        },
+      });
+    } else {
+      // Add to queue
+      await prisma.buildingQueue.create({
+        data: {
+          villageId,
+          slot: slotNum,
+          isField: false,
+          buildingType: !building.type ? targetType : null,
+          targetLevel,
+          position: 1, // Queued position
+        },
+      });
 
-    res.json({
-      success: true,
-      data: {
-        slot: slotNum,
-        type: targetType,
-        targetLevel,
-        endsAt: endsAt.toISOString(),
-        constructionTime,
-      },
-    });
+      res.json({
+        success: true,
+        data: {
+          slot: slotNum,
+          type: targetType,
+          targetLevel,
+          constructionTime,
+          queued: true,
+        },
+      });
+    }
   } catch (error) {
     console.error('Error upgrading building:', error);
     res.status(500).json({ success: false, error: 'Failed to upgrade building' });
@@ -318,7 +364,7 @@ router.post('/village/:villageId/slot/:slot/cancel', async (req: AuthRequest, re
       where: {
         villageId,
         type: 'building_complete',
-        data: { path: ['slot'], equals: String(slotNum) },
+        data: { contains: `"slot":${slotNum}` },
         processed: false,
       },
     });

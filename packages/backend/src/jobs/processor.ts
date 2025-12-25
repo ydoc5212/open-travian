@@ -4,6 +4,7 @@ import { emitToVillage, emitToUser } from '../socket';
 import { calculateStorageCapacity, UNIT_DATA, calculateTravelTime, calculateDistance, WALL_DEFENSE_BONUS } from '@travian/shared';
 import type { Tribe } from '@travian/shared';
 import { calculateVillageResources } from '../services/resources';
+import { startNextQueuedItem } from './queue-helper';
 
 const POLL_INTERVAL = 5000; // Check every 5 seconds
 
@@ -63,6 +64,14 @@ async function processJob(io: SocketServer, job: any) {
 
     case 'troops_return':
       await handleTroopsReturn(io, villageId, data);
+      break;
+
+    case 'reinforcement_arrive':
+      await handleReinforcementArrive(io, villageId, data);
+      break;
+
+    case 'trade_arrive':
+      await handleTradeArrive(io, villageId, data);
       break;
 
     default:
@@ -140,6 +149,9 @@ async function handleBuildingComplete(io: SocketServer, villageId: string, data:
     });
   }
 
+  // Check for queued items and start next one
+  await startNextQueuedItem(villageId);
+
   console.log(`Building complete: ${building.type} level ${targetLevel} at village ${villageId}`);
 }
 
@@ -189,6 +201,9 @@ async function handleFieldComplete(io: SocketServer, villageId: string, data: an
       level: targetLevel,
     });
   }
+
+  // Check for queued items and start next one
+  await startNextQueuedItem(villageId);
 
   console.log(`Field complete: ${field.type} level ${targetLevel} at village ${villageId}`);
 }
@@ -780,4 +795,119 @@ async function updateVillagePopulation(villageId: string) {
     where: { id: villageId },
     data: { population: totalPop },
   });
+}
+
+async function handleReinforcementArrive(io: SocketServer, villageId: string, data: any) {
+  const { fromVillageId, toVillageId, troops } = data;
+
+  // Find reinforcing troops
+  const reinforcingTroops = await prisma.troop.findMany({
+    where: {
+      villageId: fromVillageId,
+      status: 'reinforcing',
+      destinationVillageId: toVillageId,
+    },
+  });
+
+  await prisma.$transaction(async (tx) => {
+    // Update troops to be stationed at the reinforced village
+    for (const troop of reinforcingTroops) {
+      // Change ownership to destination village and set to home status
+      await tx.troop.update({
+        where: { id: troop.id },
+        data: {
+          villageId: toVillageId,
+          status: 'home',
+          destinationVillageId: null,
+          arrivesAt: null,
+        },
+      });
+    }
+
+    // Create notification report
+    const fromVillage = await tx.village.findUnique({
+      where: { id: fromVillageId },
+      select: { name: true, xCoord: true, yCoord: true, userId: true },
+    });
+
+    const toVillage = await tx.village.findUnique({
+      where: { id: toVillageId },
+      select: { name: true, xCoord: true, yCoord: true, user: { select: { id: true } } },
+    });
+
+    if (fromVillage && toVillage) {
+      const reportData = {
+        type: 'reinforcement',
+        fromVillage: {
+          id: fromVillageId,
+          name: fromVillage.name,
+          coordinates: { x: fromVillage.xCoord, y: fromVillage.yCoord },
+        },
+        toVillage: {
+          id: toVillageId,
+          name: toVillage.name,
+          coordinates: { x: toVillage.xCoord, y: toVillage.yCoord },
+        },
+        troops,
+      };
+
+      // Report for both sender and receiver (in case they're different users)
+      await tx.report.create({
+        data: {
+          userId: toVillage.user.id,
+          type: 'reinforcement',
+          data: JSON.stringify(reportData),
+        },
+      });
+
+      // Emit notification
+      emitToUser(io, toVillage.user.id, 'reinforcement:arrived', {
+        villageName: toVillage.name,
+        fromVillageName: fromVillage.name,
+      });
+    }
+  });
+
+  console.log(`Reinforcements arrived at ${toVillageId} from ${fromVillageId}`);
+}
+
+async function handleTradeArrive(io: SocketServer, villageId: string, data: any) {
+  const { resources } = data;
+
+  if (!resources) {
+    console.warn('No resources in trade arrival data');
+    return;
+  }
+
+  // Add resources to the village
+  await prisma.village.update({
+    where: { id: villageId },
+    data: {
+      lumber: { increment: resources.lumber || 0 },
+      clay: { increment: resources.clay || 0 },
+      iron: { increment: resources.iron || 0 },
+      crop: { increment: resources.crop || 0 },
+    },
+  });
+
+  // Get village and user info for notifications
+  const village = await prisma.village.findUnique({
+    where: { id: villageId },
+    select: { userId: true, name: true },
+  });
+
+  if (village) {
+    emitToVillage(io, villageId, 'trade:arrived', {
+      villageId,
+      resources,
+    });
+
+    emitToUser(io, village.userId, 'trade:arrived', {
+      villageName: village.name,
+      resources,
+    });
+  }
+
+  const totalResources = (resources.lumber || 0) + (resources.clay || 0) + (resources.iron || 0) + (resources.crop || 0);
+  console.log(`Trade arrived at ${villageId} with ${totalResources} total resources`);
 }

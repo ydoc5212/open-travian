@@ -1,0 +1,280 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #333;
+}
+
+.statusBadge {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+}
+
+.statusBadge[data-status='home'] {
+  background-color: #4caf50;
+  color: white;
+}
+
+.statusBadge[data-status='adventure'] {
+  background-color: #2196f3;
+  color: white;
+}
+
+.statusBadge[data-status='dead'] {
+  background-color: #f44336;
+  color: white;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.error {
+  background-color: #fee;
+  border: 1px solid #fcc;
+  color: #c33;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1.5rem;
+  color: #333;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 8px;
+}
+
+.card h3 {
+  margin-top: 16px;
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+  color: #555;
+}
+
+/* Create Form */
+.createForm {
+  max-width: 400px;
+}
+
+.formGroup {
+  margin-bottom: 16px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #555;
+}
+
+.input,
+.select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: #4caf50;
+}
+
+/* Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.statItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+}
+
+.statLabel {
+  font-weight: bold;
+  color: #666;
+}
+
+.statValue {
+  font-size: 1.2rem;
+  color: #333;
+  font-weight: bold;
+}
+
+/* XP Section */
+.xpSection {
+  margin-top: 20px;
+}
+
+.xpLabel {
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #555;
+}
+
+.xpBar {
+  width: 100%;
+  height: 24px;
+  background-color: #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.xpProgress {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50, #8bc34a);
+  transition: width 0.3s ease;
+}
+
+/* Location */
+.locationInfo {
+  padding: 12px;
+  background-color: #f0f8ff;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.locationInfo p {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.noLocation {
+  color: #999;
+  font-style: italic;
+}
+
+/* Assignment */
+.assignSection {
+  margin-top: 20px;
+}
+
+.assignControls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.assignControls .select {
+  flex: 1;
+}
+
+/* Items */
+.itemsList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.itemCard {
+  padding: 12px;
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+
+.itemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.itemName {
+  font-weight: bold;
+  color: #333;
+}
+
+.itemType {
+  font-size: 0.875rem;
+  color: #666;
+  text-transform: capitalize;
+  padding: 4px 8px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+}
+
+.itemBonus {
+  font-size: 0.875rem;
+  color: #555;
+}
+
+.noItems {
+  color: #999;
+  font-style: italic;
+}
+
+/* Revival */
+.revivalInfo {
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  color: #856404;
+}
+
+.mainContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .assignControls {
+    flex-direction: column;
+  }
+
+  .assignControls .select {
+    width: 100%;
+  }
+}

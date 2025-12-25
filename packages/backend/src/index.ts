@@ -11,6 +11,12 @@ import { resourceRouter } from './routes/resource';
 import { troopsRouter } from './routes/troops';
 import { combatRouter } from './routes/combat';
 import { reportsRouter } from './routes/reports';
+import { mapRouter } from './routes/map';
+import { oasisRouter } from './routes/oasis';
+import { allianceRouter } from './routes/alliance';
+import { marketplaceRouter } from './routes/marketplace';
+import { heroRouter } from './routes/hero';
+import { plusRouter } from './routes/plus';
 import { authMiddleware } from './middleware/auth';
 import { setupSocketHandlers } from './socket';
 import { startJobProcessor } from './jobs/processor';
@@ -45,6 +51,12 @@ app.use('/api/resources', authMiddleware, resourceRouter);
 app.use('/api/troops', authMiddleware, troopsRouter);
 app.use('/api/combat', authMiddleware, combatRouter);
 app.use('/api/reports', authMiddleware, reportsRouter);
+app.use('/api/map', authMiddleware, mapRouter);
+app.use('/api/oases', authMiddleware, oasisRouter);
+app.use('/api/alliance', authMiddleware, allianceRouter);
+app.use('/api/marketplace', authMiddleware, marketplaceRouter);
+app.use('/api/hero', authMiddleware, heroRouter);
+app.use('/api/plus', authMiddleware, plusRouter);
 
 // Socket.io setup
 setupSocketHandlers(io);

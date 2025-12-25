@@ -1,0 +1,214 @@
+.container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #7d6c46;
+}
+
+.header h2 {
+  margin: 0;
+  color: #3d3d3d;
+}
+
+.unreadBadge {
+  background: #b33;
+  color: white;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+.filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filterButton {
+  padding: 8px 16px;
+  background: #f4e4bc;
+  border: 2px solid #7d6c46;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #3d3d3d;
+  transition: all 0.2s;
+}
+
+.filterButton:hover {
+  background: #e4d4ac;
+  transform: translateY(-1px);
+}
+
+.filterButton.active {
+  background: #7d6c46;
+  color: white;
+}
+
+.reportsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reportItem {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: #fff;
+  border: 2px solid #d4c4a4;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.reportItem:hover {
+  background: #faf8f4;
+  border-color: #7d6c46;
+  transform: translateX(5px);
+}
+
+.reportItem.unread {
+  background: #fffef8;
+  border-color: #7d6c46;
+  border-left-width: 4px;
+  font-weight: bold;
+}
+
+.reportIcon {
+  flex-shrink: 0;
+}
+
+.reportInfo {
+  flex-grow: 1;
+}
+
+.reportType {
+  font-weight: bold;
+  color: #3d3d3d;
+  margin-bottom: 5px;
+}
+
+.reportTime {
+  font-size: 0.9em;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.reportPreview {
+  font-size: 0.95em;
+  color: #555;
+}
+
+.reportActions {
+  flex-shrink: 0;
+}
+
+.deleteButton {
+  padding: 5px 10px;
+  background: #b33;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.1em;
+  transition: all 0.2s;
+}
+
+.deleteButton:hover {
+  background: #933;
+  transform: scale(1.1);
+}
+
+.noReports {
+  text-align: center;
+  padding: 40px;
+  background: #fff;
+  border: 2px dashed #d4c4a4;
+  border-radius: 4px;
+  color: #999;
+  font-style: italic;
+}
+
+.loading,
+.error {
+  text-align: center;
+  padding: 40px;
+  background: #fff;
+  border: 2px solid #d4c4a4;
+  border-radius: 4px;
+}
+
+.error {
+  color: #b33;
+  border-color: #b33;
+}
+
+.genericReport {
+  background: #f4e4bc;
+  border: 2px solid #7d6c46;
+  border-radius: 4px;
+  padding: 20px;
+  margin: 10px 0;
+}
+
+.genericReport h3 {
+  margin: 0 0 15px 0;
+  color: #3d3d3d;
+  border-bottom: 2px solid #7d6c46;
+  padding-bottom: 10px;
+}
+
+.genericReport pre {
+  background: #fff;
+  padding: 15px;
+  border: 1px solid #d4c4a4;
+  border-radius: 4px;
+  overflow: auto;
+  max-height: 500px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .filters {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .filterButton {
+    width: 100%;
+    text-align: left;
+  }
+
+  .reportItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .reportActions {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+  }
+}
