@@ -52,7 +52,7 @@ const RESOURCE_TYPES = [
 
 export function MarketplaceView() {
   const currentVillage = useGameStore((state) => state.currentVillage);
-  const [activeTab, setActiveTab] = useState<'offers' | 'my-offers' | 'create' | 'trades'>('offers');
+  const [activeTab, setActiveTab] = useState<'offers' | 'my-offers' | 'create' | 'trades' | 'npc'>('offers');
 
   // Offers state
   const [offers, setOffers] = useState<Offer[]>([]);
@@ -69,6 +69,13 @@ export function MarketplaceView() {
   // Trades state
   const [incomingTrades, setIncomingTrades] = useState<Trade[]>([]);
   const [outgoingTrades, setOutgoingTrades] = useState<Trade[]>([]);
+
+  // NPC trade state
+  const [npcFromResource, setNpcFromResource] = useState('lumber');
+  const [npcToResource, setNpcToResource] = useState('clay');
+  const [npcAmount, setNpcAmount] = useState(100);
+  const [merchantInfo, setMerchantInfo] = useState<any>(null);
+  const [isNpcTrading, setIsNpcTrading] = useState(false);
 
   // Error/success
   const [error, setError] = useState<string | null>(null);
@@ -96,6 +103,9 @@ export function MarketplaceView() {
         const response = await marketplaceApi.getTrades(currentVillage.id);
         setIncomingTrades(response.data.incoming);
         setOutgoingTrades(response.data.outgoing);
+      } else if (activeTab === 'npc') {
+        const response = await marketplaceApi.getMerchantInfo(currentVillage.id);
+        setMerchantInfo(response.data);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data');
@@ -155,6 +165,32 @@ export function MarketplaceView() {
       loadData();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to cancel offer');
+    }
+  }
+
+  async function handleNpcTrade() {
+    if (!currentVillage) return;
+    setIsNpcTrading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await marketplaceApi.npcTrade(
+        currentVillage.id,
+        npcFromResource,
+        npcToResource,
+        npcAmount
+      );
+      setSuccess(
+        `NPC trade successful! Exchanged ${npcAmount} ${getResourceLabel(npcFromResource)} for ${npcAmount} ${getResourceLabel(npcToResource)}. Gold cost: ${response.data.goldCost}. Remaining gold: ${response.data.remainingGold}`
+      );
+      // Refresh merchant info and village resources
+      loadData();
+      useGameStore.getState().refreshCurrentVillage();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to execute NPC trade');
+    } finally {
+      setIsNpcTrading(false);
     }
   }
 
@@ -220,6 +256,12 @@ export function MarketplaceView() {
           onClick={() => setActiveTab('create')}
         >
           Create Offer
+        </button>
+        <button
+          className={activeTab === 'npc' ? styles.tabActive : styles.tab}
+          onClick={() => setActiveTab('npc')}
+        >
+          NPC Merchant
         </button>
         <button
           className={activeTab === 'trades' ? styles.tabActive : styles.tab}
@@ -456,6 +498,145 @@ export function MarketplaceView() {
                 {isCreating ? 'Creating...' : 'Create Offer'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'npc' && (
+        <div className="panel">
+          <div className="panel-header">NPC Merchant - Instant Resource Exchange</div>
+          <div className="panel-body">
+            {merchantInfo && (
+              <div className={styles.merchantInfo}>
+                <div className={styles.infoSection}>
+                  <h3>Merchant Information</h3>
+                  <div className={styles.infoGrid}>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Tribe:</span>
+                      <span className={styles.infoValue}>{merchantInfo.tribe.charAt(0).toUpperCase() + merchantInfo.tribe.slice(1)}</span>
+                    </div>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Base Capacity:</span>
+                      <span className={styles.infoValue}>{merchantInfo.baseCapacity} resources</span>
+                    </div>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Current Capacity:</span>
+                      <span className={styles.infoValue}>{merchantInfo.currentCapacity} resources</span>
+                    </div>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Trade Office Level:</span>
+                      <span className={styles.infoValue}>{merchantInfo.tradeOfficeLevel}</span>
+                    </div>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Trade Office Bonus:</span>
+                      <span className={styles.infoValue}>+{merchantInfo.tradeOfficeBonus}%</span>
+                    </div>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Merchant Speed:</span>
+                      <span className={styles.infoValue}>{merchantInfo.merchantSpeed} fields/hour</span>
+                    </div>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Your Gold:</span>
+                      <span className={styles.infoValue} style={{ color: '#FFD700', fontWeight: 'bold' }}>{merchantInfo.gold} gold</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.npcTradeForm}>
+                  <h3>Exchange Resources with NPC Merchant</h3>
+                  <p className={styles.npcDescription}>
+                    The NPC Merchant allows instant resource exchange at a 1:1 ratio for a small gold cost.
+                    Cost: 1 gold per 100 resources (minimum 1 gold).
+                  </p>
+
+                  <div className={styles.formRow}>
+                    <div className={styles.formSection}>
+                      <h4>Exchange From:</h4>
+                      <div className={styles.formGroup}>
+                        <label className="form-label">Resource Type</label>
+                        <select
+                          className={styles.select}
+                          value={npcFromResource}
+                          onChange={(e) => setNpcFromResource(e.target.value)}
+                        >
+                          {RESOURCE_TYPES.map((res) => (
+                            <option key={res.value} value={res.value}>
+                              {res.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className={styles.resourcePreview}>
+                        <span
+                          className={styles.resourceIcon}
+                          style={{ backgroundColor: getResourceColor(npcFromResource) }}
+                        />
+                        <span>
+                          You have: {Math.floor(currentVillage.resources[npcFromResource as keyof typeof currentVillage.resources])} {getResourceLabel(npcFromResource)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className={styles.arrow} style={{ fontSize: '2rem', alignSelf: 'center' }}>→</div>
+
+                    <div className={styles.formSection}>
+                      <h4>Exchange To:</h4>
+                      <div className={styles.formGroup}>
+                        <label className="form-label">Resource Type</label>
+                        <select
+                          className={styles.select}
+                          value={npcToResource}
+                          onChange={(e) => setNpcToResource(e.target.value)}
+                        >
+                          {RESOURCE_TYPES.filter((r) => r.value !== npcFromResource).map((res) => (
+                            <option key={res.value} value={res.value}>
+                              {res.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={styles.formGroup} style={{ marginTop: '1rem' }}>
+                    <label className="form-label">Amount to Exchange</label>
+                    <input
+                      type="number"
+                      className={styles.input}
+                      value={npcAmount}
+                      onChange={(e) => setNpcAmount(Math.max(1, parseInt(e.target.value) || 1))}
+                      min={1}
+                      step={10}
+                    />
+                  </div>
+
+                  <div className={styles.tradeSummary}>
+                    <p>
+                      <strong>Exchange:</strong> {npcAmount} {getResourceLabel(npcFromResource)} → {npcAmount} {getResourceLabel(npcToResource)}
+                    </p>
+                    <p>
+                      <strong>Gold Cost:</strong> {Math.max(1, Math.ceil(npcAmount / 100))} gold
+                    </p>
+                    <p className={styles.note}>
+                      This is an instant trade - no merchants travel time required!
+                    </p>
+                  </div>
+
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleNpcTrade}
+                    disabled={
+                      isNpcTrading ||
+                      !hasEnoughResources(npcFromResource, npcAmount) ||
+                      merchantInfo.gold < Math.max(1, Math.ceil(npcAmount / 100)) ||
+                      npcAmount < 1
+                    }
+                  >
+                    {isNpcTrading ? 'Processing...' : 'Execute NPC Trade'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

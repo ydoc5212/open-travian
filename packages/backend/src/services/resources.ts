@@ -35,6 +35,11 @@ export async function calculateVillageResources(villageId: string): Promise<Vill
       buildings: true,
       troops: { where: { status: 'home' } },
       ownedOases: true,
+      user: {
+        include: {
+          resourceBonuses: true,
+        },
+      },
     },
   });
 
@@ -93,15 +98,57 @@ export async function calculateVillageResources(villageId: string): Promise<Vill
     }
   }
 
-  // Calculate troop upkeep (crop consumption)
-  let cropConsumption = village.population; // Base population consumption
-  for (const troop of village.troops) {
-    const { UNIT_DATA } = await import('@travian/shared');
-    const unitData = UNIT_DATA[troop.unitType];
-    if (unitData) {
-      cropConsumption += unitData.upkeep * troop.quantity;
+  // Apply resource bonuses from gold purchases
+  const activeResourceBonuses = village.user.resourceBonuses.filter(
+    (bonus) => new Date(bonus.expiresAt) > now
+  );
+
+  for (const bonus of activeResourceBonuses) {
+    const resourceType = bonus.resourceType as ResourceType;
+    if (resourceType in production) {
+      const baseProduction = production[resourceType];
+      const bonusProduction = (baseProduction * bonus.bonusPercent) / 100;
+      production[resourceType] = baseProduction + bonusProduction;
     }
   }
+
+  // Calculate troop upkeep (crop consumption)
+  let cropConsumption = village.population; // Base population consumption
+
+  // Import UNIT_DATA for upkeep calculation
+  const { UNIT_DATA } = await import('@travian/shared');
+
+  // Calculate cavalry consumption separately for Horse Drinking Trough bonus
+  const cavalryUnits = new Set([
+    'equites_legati', 'equites_imperatoris', 'equites_caesaris',
+    'pathfinder', 'theutates_thunder', 'druidrider', 'haeduan',
+    'scout', 'paladin', 'teutonic_knight',
+  ]);
+
+  let cavalryConsumption = 0;
+  let infantryConsumption = 0;
+
+  for (const troop of village.troops) {
+    const unitData = UNIT_DATA[troop.unitType];
+    if (unitData) {
+      const consumption = unitData.upkeep * troop.quantity;
+      if (cavalryUnits.has(troop.unitType)) {
+        cavalryConsumption += consumption;
+      } else {
+        infantryConsumption += consumption;
+      }
+    }
+  }
+
+  // Apply Horse Drinking Trough reduction for Romans only
+  const horsedrinkingTrough = village.buildings.find((b) => b.type === 'horse_drinking_trough');
+  if (horsedrinkingTrough && horsedrinkingTrough.level > 0) {
+    // 1% reduction per level (max 20%)
+    const reduction = horsedrinkingTrough.level / 100;
+    cavalryConsumption *= (1 - reduction);
+  }
+
+  cropConsumption += infantryConsumption + cavalryConsumption;
 
   // Net crop production
   const netCropProduction = production.crop - cropConsumption;

@@ -192,6 +192,15 @@ export const marketplaceApi = {
 
   getTrades: (villageId: string) =>
     request<{ success: boolean; data: any }>(`/marketplace/trades?villageId=${villageId}`),
+
+  npcTrade: (villageId: string, fromResource: string, toResource: string, amount: number) =>
+    request<{ success: boolean; data: any }>('/marketplace/npc-trade', {
+      method: 'POST',
+      body: JSON.stringify({ villageId, fromResource, toResource, amount }),
+    }),
+
+  getMerchantInfo: (villageId: string) =>
+    request<{ success: boolean; data: any }>(`/marketplace/merchant-info?villageId=${villageId}`),
 };
 
 // Hero API
@@ -255,6 +264,72 @@ export const allianceApi = {
       method: 'PUT',
       body: JSON.stringify({ role }),
     }),
+
+  // Alliance messaging
+  getMessages: () =>
+    request<{ success: boolean; data: { messages: any[] } }>('/alliance/messages'),
+
+  sendMessage: (subject: string, body: string) =>
+    request<{ success: boolean; data: { message: any } }>('/alliance/messages', {
+      method: 'POST',
+      body: JSON.stringify({ subject, body }),
+    }),
+
+  // Alliance diplomacy
+  getDiplomacy: () =>
+    request<{ success: boolean; data: { relations: any[] } }>('/alliance/diplomacy'),
+
+  proposeDiplomacy: (targetAllianceId: string, relationType: 'nap' | 'confederation' | 'war') =>
+    request<{ success: boolean; data: { relation: any } }>('/alliance/diplomacy', {
+      method: 'POST',
+      body: JSON.stringify({ targetAllianceId, relationType }),
+    }),
+
+  acceptDiplomacy: (relationId: string) =>
+    request<{ success: boolean; data: { relation: any } }>(`/alliance/diplomacy/${relationId}/accept`, {
+      method: 'PUT',
+    }),
+
+  rejectDiplomacy: (relationId: string) =>
+    request<{ success: boolean; data: { relation: any } }>(`/alliance/diplomacy/${relationId}/reject`, {
+      method: 'PUT',
+    }),
+
+  endDiplomacy: (relationId: string) =>
+    request<{ success: boolean; data: { message: string } }>(`/alliance/diplomacy/${relationId}`, {
+      method: 'DELETE',
+    }),
+};
+
+// Messages API
+export const messagesApi = {
+  getInbox: () =>
+    request<{ success: boolean; data: { messages: any[] } }>('/messages/inbox'),
+
+  getOutbox: () =>
+    request<{ success: boolean; data: { messages: any[] } }>('/messages/outbox'),
+
+  get: (messageId: string) =>
+    request<{ success: boolean; data: { message: any } }>(`/messages/${messageId}`),
+
+  send: (recipientUsername: string, subject: string, body: string) =>
+    request<{ success: boolean; data: { message: any } }>('/messages', {
+      method: 'POST',
+      body: JSON.stringify({ recipientUsername, subject, body }),
+    }),
+
+  markRead: (messageId: string) =>
+    request<{ success: boolean }>(`/messages/${messageId}/read`, {
+      method: 'PUT',
+    }),
+
+  delete: (messageId: string) =>
+    request<{ success: boolean }>(`/messages/${messageId}`, {
+      method: 'DELETE',
+    }),
+
+  getUnreadCount: () =>
+    request<{ success: boolean; data: { count: number } }>('/messages/unread/count'),
 };
 
 // Plus API
@@ -264,6 +339,29 @@ export const plusApi = {
 
   activate: () =>
     request<{ success: boolean; data: { isActive: boolean; expiresAt: string } }>('/plus/activate', {
+      method: 'POST',
+    }),
+};
+
+// Celebration API
+export const celebrationApi = {
+  get: (villageId: string) =>
+    request<{ success: boolean; data: any }>(`/celebration/${villageId}`),
+
+  start: (villageId: string, type: 'small' | 'large') =>
+    request<{ success: boolean; data: { celebration: any } }>(`/celebration/${villageId}/start`, {
+      method: 'POST',
+      body: JSON.stringify({ type }),
+    }),
+};
+
+// Adventure API
+export const adventureApi = {
+  list: () =>
+    request<{ success: boolean; data: { hero: any; herosMansionLevel: number; adventures: any[] } }>('/adventure'),
+
+  start: (adventureId: string) =>
+    request<{ success: boolean; data: { adventure: any } }>(`/adventure/${adventureId}/start`, {
       method: 'POST',
     }),
 };

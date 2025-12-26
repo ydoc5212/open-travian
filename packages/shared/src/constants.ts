@@ -28,6 +28,17 @@ export const GAME_CONFIG = {
   MAX_VILLAGES_BASE: 3,
   STARTING_LOYALTY: 100,
 
+  // Village expansion & conquest
+  SETTLERS_REQUIRED: 3, // 3 settlers needed to found a village
+  CONQUEST_LOYALTY_REDUCTION_MIN: 20, // Chief/Senator reduces loyalty by 20-30%
+  CONQUEST_LOYALTY_REDUCTION_MAX: 30,
+  SMALL_CELEBRATION_DURATION: 86400, // 24 hours (in seconds before speed multiplier)
+  LARGE_CELEBRATION_DURATION: 172800, // 48 hours (in seconds before speed multiplier)
+  SMALL_CELEBRATION_LOYALTY_GAIN: 5, // Small celebration adds 5% loyalty
+  LARGE_CELEBRATION_LOYALTY_GAIN: 10, // Large celebration adds 10% loyalty
+  SMALL_CELEBRATION_COST: { lumber: 6400, clay: 6650, iron: 5940, crop: 1340 } as Resources,
+  LARGE_CELEBRATION_COST: { lumber: 29700, clay: 33250, iron: 32000, crop: 6700 } as Resources,
+
   // Resource field layout (classic 4-4-4-6 distribution)
   RESOURCE_FIELD_LAYOUT: [
     'woodcutter', 'woodcutter', 'woodcutter', 'woodcutter',
@@ -262,11 +273,38 @@ export const BUILDING_DATA: Record<BuildingType, BuildingStats> = {
     type: 'brewery',
     name: 'Brewery',
     maxLevel: 20,
-    description: 'Teutons only. Increases attack power of troops.',
+    description: 'Teutons only. Increases attack power of troops by 1% per level.',
     prerequisites: [{ type: 'granary', level: 20 }, { type: 'rally_point', level: 10 }],
     baseCost: { lumber: 1460, clay: 930, iron: 1250, crop: 1740 },
     baseTime: 10800,
     tribe: 'teutons',
+  },
+  tournament_square: {
+    type: 'tournament_square',
+    name: 'Tournament Square',
+    maxLevel: 20,
+    description: 'Increases attack troop speed for distances >20 squares by 1% per level (max 20%).',
+    prerequisites: [{ type: 'rally_point', level: 15 }],
+    baseCost: { lumber: 1750, clay: 2250, iron: 1530, crop: 240 },
+    baseTime: 7200,
+  },
+  stonemason: {
+    type: 'stonemason',
+    name: 'Stonemason',
+    maxLevel: 5,
+    description: 'Capital only. Increases building durability against catapults by 10% per level.',
+    prerequisites: [{ type: 'main_building', level: 5 }, { type: 'palace', level: 3 }],
+    baseCost: { lumber: 155, clay: 130, iron: 125, crop: 70 },
+    baseTime: 3600,
+  },
+  heros_mansion: {
+    type: 'heros_mansion',
+    name: "Hero's Mansion",
+    maxLevel: 20,
+    description: "The Hero's Mansion allows you to send your hero on adventures. Higher levels unlock more adventure slots.",
+    prerequisites: [{ type: 'main_building', level: 3 }, { type: 'rally_point', level: 1 }],
+    baseCost: { lumber: 700, clay: 670, iron: 700, crop: 240 },
+    baseTime: 5400,
   },
 };
 
@@ -761,6 +799,43 @@ export const WALL_DEFENSE_BONUS: Record<Tribe, number> = {
   gauls: 1.025,   // 2.5% per level
   teutons: 1.02,  // 2% per level
 };
+
+// Scout unit types for counter-intelligence
+export const SCOUT_UNITS = new Set([
+  'equites_legati',  // Roman scout
+  'pathfinder',      // Gaul scout
+  'scout',           // Teuton scout
+]);
+
+// Ram unit types for wall destruction
+export const RAM_UNITS = new Set([
+  'roman_ram',
+  'gaul_ram',
+  'teuton_ram',
+]);
+
+// Catapult unit types for building destruction
+export const CATAPULT_UNITS = new Set([
+  'roman_catapult',
+  'gaul_catapult',
+  'teuton_catapult',
+]);
+
+// Cranny hiding capacity per level per tribe
+export const CRANNY_CAPACITY: Record<Tribe, number> = {
+  romans: 1000,  // 1000 per cranny
+  gauls: 2000,   // 2000 per cranny (Gaul bonus)
+  teutons: 1000, // 1000 per cranny
+};
+
+// Teuton cranny bypass percentage
+export const TEUTON_CRANNY_BYPASS = 0.333; // 1/3 of cranny protection
+
+// Trapper capacity per level (Gauls only)
+export function calculateTrapperCapacity(level: number): number {
+  // Travian formula: 100 * level^1.5
+  return Math.floor(100 * Math.pow(level, 1.5));
+}
 
 // ============================================
 // FORMULAS

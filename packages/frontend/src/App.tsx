@@ -16,6 +16,11 @@ import { AllianceView } from './pages/AllianceView';
 import { MarketplaceView } from './pages/MarketplaceView';
 import { HeroView } from './pages/HeroView';
 import { ReportsView } from './pages/ReportsView';
+import { MessagesView } from './pages/MessagesView';
+import { TownHallView } from './pages/TownHallView';
+import { AdventureView } from './pages/AdventureView';
+import { ArtefactsView } from './pages/ArtefactsView';
+import { WorldWondersView } from './pages/WorldWondersView';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -65,6 +70,11 @@ function App() {
         <Route path="marketplace" element={<MarketplaceView />} />
         <Route path="hero" element={<HeroView />} />
         <Route path="reports" element={<ReportsView />} />
+        <Route path="messages" element={<MessagesView />} />
+        <Route path="town-hall/:villageId" element={<TownHallView />} />
+        <Route path="adventures" element={<AdventureView />} />
+        <Route path="artefacts" element={<ArtefactsView />} />
+        <Route path="world-wonders" element={<WorldWondersView />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -243,3 +243,156 @@
     width: 100%;
   }
 }
+
+/* Section header (for messages and diplomacy) */
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* Alliance Messages */
+.messageForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--color-brown-medium);
+}
+
+.messageTextarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--color-brown-medium);
+  border-radius: 2px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  resize: vertical;
+}
+
+.messageTextarea:focus {
+  outline: none;
+  border-color: var(--color-green-dark);
+}
+
+.messagesList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.messageItem {
+  padding: 12px;
+  background: var(--color-parchment-light);
+  border: 1px solid var(--color-brown-light);
+  border-radius: 2px;
+}
+
+.messageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.messageSender {
+  font-weight: bold;
+  color: var(--color-brown-dark);
+  font-size: 0.8rem;
+}
+
+.messageDate {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+
+.messageSubject {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--color-text);
+  font-size: 0.875rem;
+}
+
+.messageBody {
+  white-space: pre-wrap;
+  line-height: 1.4;
+  color: var(--color-text);
+  font-size: 0.75rem;
+}
+
+.emptyText {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: 20px;
+  font-size: 0.75rem;
+}
+
+/* Diplomacy */
+.diplomacyForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--color-brown-medium);
+}
+
+.helpText {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.diplomacyList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.diplomacyItem {
+  padding: 12px;
+  background: var(--color-parchment-light);
+  border: 1px solid var(--color-brown-light);
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.diplomacyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.relationType {
+  font-weight: bold;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+}
+
+.diplomacyStatus {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.diplomacyAlliance {
+  font-size: 0.8rem;
+  color: var(--color-text);
+}
+
+.diplomacyDate {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+
+.diplomacyActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}

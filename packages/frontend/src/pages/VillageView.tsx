@@ -196,6 +196,26 @@ export function VillageView() {
               <>
                 <p className={styles.description}>{buildingInfo.description}</p>
 
+                {/* Special building navigation */}
+                {selectedBuilding.type === 'town_hall' && selectedBuilding.level > 0 && (
+                  <Link
+                    to={`/town-hall/${currentVillage.id}`}
+                    className="btn btn-primary mb-2"
+                    style={{ display: 'block', textAlign: 'center' }}
+                  >
+                    Hold Celebration
+                  </Link>
+                )}
+                {selectedBuilding.type === 'heros_mansion' && selectedBuilding.level > 0 && (
+                  <Link
+                    to="/adventures"
+                    className="btn btn-primary mb-2"
+                    style={{ display: 'block', textAlign: 'center' }}
+                  >
+                    View Adventures
+                  </Link>
+                )}
+
                 {selectedBuilding.level < buildingInfo.maxLevel && (
                   <div className={styles.upgradeSection}>
                     {constructionInProgress ? (

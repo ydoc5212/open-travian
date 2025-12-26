@@ -12,16 +12,58 @@ const MERCHANT_CAPACITY: Record<string, number> = {
   teutons: 1000,
 };
 
-// Calculate travel time between villages (simplified: 1 minute per field)
-function calculateTravelTime(fromX: number, fromY: number, toX: number, toY: number): number {
+// Merchant speed per tribe (fields per hour) - Romans are fastest
+const MERCHANT_SPEED: Record<string, number> = {
+  romans: 20, // Fastest merchants
+  gauls: 16,  // Medium speed
+  teutons: 12, // Slowest merchants
+};
+
+// NPC trader exchange rates (gold cost per 100 resources)
+const NPC_GOLD_COST_PER_100 = 1; // 1 gold per 100 resources traded
+
+// Calculate merchant capacity including Trade Office bonus (20% per level)
+async function calculateMerchantCapacity(villageId: string, baseTribe: string): Promise<number> {
+  const baseCapacity = MERCHANT_CAPACITY[baseTribe] || 500;
+
+  // Find Trade Office building
+  const tradeOffice = await prisma.building.findFirst({
+    where: {
+      villageId,
+      type: 'trade_office',
+    },
+  });
+
+  if (!tradeOffice || tradeOffice.level === 0) {
+    return baseCapacity;
+  }
+
+  // Add 20% per Trade Office level
+  const bonus = 1 + (tradeOffice.level * 0.2);
+  return Math.floor(baseCapacity * bonus);
+}
+
+// Calculate travel time between villages with tribe-specific speed
+function calculateTravelTime(
+  fromX: number,
+  fromY: number,
+  toX: number,
+  toY: number,
+  tribe: string
+): number {
   const distance = Math.sqrt(Math.pow(toX - fromX, 2) + Math.pow(toY - fromY, 2));
-  // 1 minute per field at base speed
-  return Math.ceil(distance * 60);
+  const speed = MERCHANT_SPEED[tribe] || 16; // Default to Gaul speed
+  // Time = distance / speed * 3600 seconds (per hour)
+  return Math.ceil((distance / speed) * 3600);
 }
 
 // Calculate merchants needed
-function calculateMerchantsNeeded(totalResources: number, tribe: string): number {
-  const capacity = MERCHANT_CAPACITY[tribe] || 500;
+async function calculateMerchantsNeeded(
+  villageId: string,
+  totalResources: number,
+  tribe: string
+): Promise<number> {
+  const capacity = await calculateMerchantCapacity(villageId, tribe);
   return Math.ceil(totalResources / capacity);
 }
 
@@ -290,17 +332,22 @@ router.post('/accept/:offerId', async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Calculate travel time
+    // Calculate travel time with tribe-specific speed
     const travelTime = calculateTravelTime(
       buyerVillage.xCoord,
       buyerVillage.yCoord,
       offer.village.xCoord,
-      offer.village.yCoord
+      offer.village.yCoord,
+      buyerVillage.user.tribe
     );
 
-    // Calculate merchants needed
+    // Calculate merchants needed with Trade Office bonus
     const totalResources = offer.wantAmount;
-    const merchantsNeeded = calculateMerchantsNeeded(totalResources, buyerVillage.user.tribe);
+    const merchantsNeeded = await calculateMerchantsNeeded(
+      villageId,
+      totalResources,
+      buyerVillage.user.tribe
+    );
 
     // Deduct resources from buyer
     await deductResources(villageId, resourceToDeduct);
@@ -505,6 +552,172 @@ router.get('/trades', async (req: AuthRequest, res: Response) => {
   } catch (error) {
     console.error('Error fetching trades:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch trades' });
+  }
+});
+
+// POST /api/marketplace/npc-trade - NPC Merchant instant trade with gold
+router.post('/npc-trade', async (req: AuthRequest, res: Response) => {
+  try {
+    const { villageId, fromResource, toResource, amount } = req.body;
+
+    if (!villageId || !fromResource || !toResource || !amount) {
+      return res.status(400).json({ success: false, error: 'Missing required fields' });
+    }
+
+    if (amount < 1) {
+      return res.status(400).json({ success: false, error: 'Amount must be positive' });
+    }
+
+    if (fromResource === toResource) {
+      return res.status(400).json({ success: false, error: 'Cannot trade same resource type' });
+    }
+
+    const validTypes = ['lumber', 'clay', 'iron', 'crop'];
+    if (!validTypes.includes(fromResource) || !validTypes.includes(toResource)) {
+      return res.status(400).json({ success: false, error: 'Invalid resource type' });
+    }
+
+    // Verify user owns this village
+    const village = await prisma.village.findFirst({
+      where: { id: villageId, userId: req.userId },
+      include: {
+        user: true,
+      },
+    });
+
+    if (!village) {
+      return res.status(404).json({ success: false, error: 'Village not found' });
+    }
+
+    // Check if marketplace exists
+    const marketplace = await prisma.building.findFirst({
+      where: {
+        villageId,
+        type: 'marketplace',
+      },
+    });
+
+    if (!marketplace || marketplace.level === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'You need a Marketplace to use NPC trading',
+      });
+    }
+
+    // Calculate gold cost (1 gold per 100 resources, minimum 1)
+    const goldCost = Math.max(1, Math.ceil(amount / 100));
+
+    // Check if user has enough gold
+    if (village.user.gold < goldCost) {
+      return res.status(400).json({
+        success: false,
+        error: `Not enough gold. Need ${goldCost} gold, have ${village.user.gold} gold`,
+      });
+    }
+
+    // Check if user has enough of the source resource
+    const resourceToDeduct = {
+      lumber: fromResource === 'lumber' ? amount : 0,
+      clay: fromResource === 'clay' ? amount : 0,
+      iron: fromResource === 'iron' ? amount : 0,
+      crop: fromResource === 'crop' ? amount : 0,
+    };
+
+    const { hasEnough, current } = await hasEnoughResources(villageId, resourceToDeduct);
+    if (!hasEnough) {
+      return res.status(400).json({
+        success: false,
+        error: 'Not enough resources',
+        data: { required: resourceToDeduct, current },
+      });
+    }
+
+    // Deduct source resource
+    await deductResources(villageId, resourceToDeduct);
+
+    // Add target resource (1:1 exchange)
+    const resourceToAdd = {
+      lumber: toResource === 'lumber' ? amount : 0,
+      clay: toResource === 'clay' ? amount : 0,
+      iron: toResource === 'iron' ? amount : 0,
+      crop: toResource === 'crop' ? amount : 0,
+    };
+
+    await addResources(villageId, resourceToAdd);
+
+    // Deduct gold
+    await prisma.user.update({
+      where: { id: req.userId },
+      data: {
+        gold: village.user.gold - goldCost,
+      },
+    });
+
+    res.json({
+      success: true,
+      data: {
+        message: 'NPC trade completed successfully',
+        traded: { from: fromResource, to: toResource, amount },
+        goldCost,
+        remainingGold: village.user.gold - goldCost,
+      },
+    });
+  } catch (error) {
+    console.error('Error executing NPC trade:', error);
+    res.status(500).json({ success: false, error: 'Failed to execute NPC trade' });
+  }
+});
+
+// GET /api/marketplace/merchant-info - Get merchant capacity and availability
+router.get('/merchant-info', async (req: AuthRequest, res: Response) => {
+  try {
+    const { villageId } = req.query;
+
+    if (!villageId || typeof villageId !== 'string') {
+      return res.status(400).json({ success: false, error: 'Village ID required' });
+    }
+
+    // Verify user owns this village
+    const village = await prisma.village.findFirst({
+      where: { id: villageId, userId: req.userId },
+      include: {
+        user: true,
+      },
+    });
+
+    if (!village) {
+      return res.status(404).json({ success: false, error: 'Village not found' });
+    }
+
+    // Get Trade Office level
+    const tradeOffice = await prisma.building.findFirst({
+      where: {
+        villageId,
+        type: 'trade_office',
+      },
+    });
+
+    const baseCapacity = MERCHANT_CAPACITY[village.user.tribe] || 500;
+    const capacity = await calculateMerchantCapacity(villageId, village.user.tribe);
+    const tradeOfficeLevel = tradeOffice?.level || 0;
+    const tradeOfficeBonus = tradeOfficeLevel * 20; // percentage
+    const merchantSpeed = MERCHANT_SPEED[village.user.tribe] || 16;
+
+    res.json({
+      success: true,
+      data: {
+        tribe: village.user.tribe,
+        baseCapacity,
+        currentCapacity: capacity,
+        tradeOfficeLevel,
+        tradeOfficeBonus,
+        merchantSpeed,
+        gold: village.user.gold,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching merchant info:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch merchant info' });
   }
 });
 

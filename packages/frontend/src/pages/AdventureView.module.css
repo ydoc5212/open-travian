@@ -1,0 +1,142 @@
+.container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.heroInfo {
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.1), rgba(75, 0, 130, 0.1));
+  border: 2px solid rgba(138, 43, 226, 0.5);
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.heroInfo h3 {
+  margin: 0 0 10px 0;
+  color: #ba68c8;
+}
+
+.heroStats {
+  display: flex;
+  gap: 20px;
+  font-size: 0.95em;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.activeAdventures,
+.availableAdventures {
+  margin-top: 30px;
+}
+
+.activeAdventures h3,
+.availableAdventures h3 {
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.adventureList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 15px;
+}
+
+.adventureCard {
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.adventureHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.difficulty {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85em;
+  font-weight: bold;
+  text-transform: uppercase;
+  background: rgba(128, 128, 128, 0.3);
+  color: #fff;
+}
+
+.difficulty.easy {
+  background: rgba(76, 175, 80, 0.3);
+  color: #81c784;
+}
+
+.difficulty.medium {
+  background: rgba(255, 152, 0, 0.3);
+  color: #ffb74d;
+}
+
+.difficulty.hard {
+  background: rgba(244, 67, 54, 0.3);
+  color: #e57373;
+}
+
+.coords {
+  font-family: monospace;
+  font-size: 0.9em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.adventureInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9em;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.hint {
+  font-size: 0.85em;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+.expires {
+  color: #ff9800;
+  font-size: 0.85em;
+}
+
+.noAdventures {
+  padding: 30px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+.info {
+  margin-top: 40px;
+  padding: 20px;
+  background: rgba(33, 150, 243, 0.1);
+  border-left: 4px solid #2196f3;
+  border-radius: 4px;
+}
+
+.info h4 {
+  margin-top: 0;
+  color: #64b5f6;
+}
+
+.info p {
+  margin: 10px 0;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.adventureCard button {
+  margin-top: auto;
+  width: 100%;
+}

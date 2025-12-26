@@ -22,6 +22,27 @@ interface Alliance {
   myRole?: string;
 }
 
+interface AllianceMessage {
+  id: string;
+  senderId: string;
+  senderUsername: string;
+  senderRole: string;
+  subject: string;
+  body: string;
+  sentAt: string;
+}
+
+interface DiplomaticRelation {
+  id: string;
+  initiatorId: string;
+  targetId: string;
+  relationType: string;
+  status: string;
+  createdAt: string;
+  initiatorAlliance: { id: string; name: string; tag: string };
+  targetAlliance: { id: string; name: string; tag: string };
+}
+
 export function AllianceView() {
   const [alliance, setAlliance] = useState<Alliance | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,6 +63,20 @@ export function AllianceView() {
   // Role management
   const [changingRole, setChangingRole] = useState<string | null>(null);
 
+  // Alliance messaging
+  const [allianceMessages, setAllianceMessages] = useState<AllianceMessage[]>([]);
+  const [showMessageForm, setShowMessageForm] = useState(false);
+  const [messageSubject, setMessageSubject] = useState('');
+  const [messageBody, setMessageBody] = useState('');
+  const [sendingMessage, setSendingMessage] = useState(false);
+
+  // Diplomacy
+  const [diplomacy, setDiplomacy] = useState<DiplomaticRelation[]>([]);
+  const [showDiplomacyForm, setShowDiplomacyForm] = useState(false);
+  const [targetAllianceId, setTargetAllianceId] = useState('');
+  const [relationType, setRelationType] = useState<'nap' | 'confederation' | 'war'>('nap');
+  const [proposingDiplomacy, setProposingDiplomacy] = useState(false);
+
   useEffect(() => {
     loadAlliance();
   }, []);
@@ -52,6 +87,16 @@ export function AllianceView() {
       setError(null);
       const response = await allianceApi.getCurrent();
       setAlliance(response.data.alliance);
+
+      // Load alliance messages and diplomacy if in an alliance
+      if (response.data.alliance) {
+        const [messagesResponse, diplomacyResponse] = await Promise.all([
+          allianceApi.getMessages(),
+          allianceApi.getDiplomacy(),
+        ]);
+        setAllianceMessages(messagesResponse.data.messages);
+        setDiplomacy(diplomacyResponse.data.relations);
+      }
     } catch (err) {
       console.error('Failed to load alliance:', err);
       setError('Failed to load alliance data');
@@ -173,6 +218,115 @@ export function AllianceView() {
   function canChangeRole(): boolean {
     if (!alliance || !alliance.myRole) return false;
     return alliance.myRole === 'founder';
+  }
+
+  // Alliance messaging handlers
+  async function handleSendAllianceMessage(e: React.FormEvent) {
+    e.preventDefault();
+    setSendingMessage(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      await allianceApi.sendMessage(messageSubject, messageBody);
+      setSuccess('Message sent to all alliance members!');
+      setShowMessageForm(false);
+      setMessageSubject('');
+      setMessageBody('');
+      await loadAlliance();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send message');
+    } finally {
+      setSendingMessage(false);
+    }
+  }
+
+  function canSendAllianceMessage(): boolean {
+    if (!alliance || !alliance.myRole) return false;
+    return ['founder', 'leader', 'officer'].includes(alliance.myRole);
+  }
+
+  // Diplomacy handlers
+  async function handleProposeDiplomacy(e: React.FormEvent) {
+    e.preventDefault();
+    setProposingDiplomacy(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      await allianceApi.proposeDiplomacy(targetAllianceId, relationType);
+      const relationTypeLabel = relationType === 'nap' ? 'Non-Aggression Pact' : relationType === 'confederation' ? 'Confederation' : 'War';
+      setSuccess(`${relationTypeLabel} ${relationType === 'war' ? 'declared' : 'proposed'}!`);
+      setShowDiplomacyForm(false);
+      setTargetAllianceId('');
+      setRelationType('nap');
+      await loadAlliance();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to propose diplomatic relation');
+    } finally {
+      setProposingDiplomacy(false);
+    }
+  }
+
+  async function handleAcceptDiplomacy(relationId: string) {
+    try {
+      setError(null);
+      setSuccess(null);
+      await allianceApi.acceptDiplomacy(relationId);
+      setSuccess('Diplomatic proposal accepted!');
+      await loadAlliance();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to accept diplomatic relation');
+    }
+  }
+
+  async function handleRejectDiplomacy(relationId: string) {
+    try {
+      setError(null);
+      setSuccess(null);
+      await allianceApi.rejectDiplomacy(relationId);
+      setSuccess('Diplomatic proposal rejected!');
+      await loadAlliance();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to reject diplomatic relation');
+    }
+  }
+
+  async function handleEndDiplomacy(relationId: string) {
+    if (!confirm('Are you sure you want to end this diplomatic relation?')) return;
+
+    try {
+      setError(null);
+      setSuccess(null);
+      await allianceApi.endDiplomacy(relationId);
+      setSuccess('Diplomatic relation ended!');
+      await loadAlliance();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to end diplomatic relation');
+    }
+  }
+
+  function canManageDiplomacy(): boolean {
+    if (!alliance || !alliance.myRole) return false;
+    return ['founder', 'leader'].includes(alliance.myRole);
+  }
+
+  function getRelationTypeLabel(type: string): string {
+    switch (type) {
+      case 'nap': return 'Non-Aggression Pact';
+      case 'confederation': return 'Confederation';
+      case 'war': return 'War';
+      default: return type;
+    }
+  }
+
+  function getRelationTypeColor(type: string): string {
+    switch (type) {
+      case 'nap': return '#4CAF50';
+      case 'confederation': return '#2196F3';
+      case 'war': return '#c41e3a';
+      default: return '#666';
+    }
   }
 
   if (loading) {
@@ -394,6 +548,195 @@ export function AllianceView() {
                       )}
                     </div>
                   ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Alliance Messages */}
+          <div className="panel">
+            <div className="panel-header">
+              <div className={styles.sectionHeader}>
+                <span>Alliance Messages</span>
+                {canSendAllianceMessage() && (
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => setShowMessageForm(!showMessageForm)}
+                  >
+                    {showMessageForm ? 'Cancel' : 'Send Message'}
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="panel-body">
+              {showMessageForm && (
+                <form onSubmit={handleSendAllianceMessage} className={styles.messageForm}>
+                  <div className="form-group">
+                    <label className="form-label">Subject:</label>
+                    <input
+                      type="text"
+                      className="input"
+                      placeholder="Enter subject"
+                      value={messageSubject}
+                      onChange={(e) => setMessageSubject(e.target.value)}
+                      maxLength={100}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Message:</label>
+                    <textarea
+                      className={styles.messageTextarea}
+                      placeholder="Enter your message to all alliance members"
+                      value={messageBody}
+                      onChange={(e) => setMessageBody(e.target.value)}
+                      rows={6}
+                      maxLength={5000}
+                      required
+                    />
+                  </div>
+                  <button type="submit" className="btn btn-primary" disabled={sendingMessage}>
+                    {sendingMessage ? 'Sending...' : 'Send to All Members'}
+                  </button>
+                </form>
+              )}
+
+              <div className={styles.messagesList}>
+                {allianceMessages.length === 0 ? (
+                  <p className={styles.emptyText}>No alliance messages yet.</p>
+                ) : (
+                  allianceMessages.map((msg) => (
+                    <div key={msg.id} className={styles.messageItem}>
+                      <div className={styles.messageHeader}>
+                        <span className={styles.messageSender}>
+                          {msg.senderUsername}
+                          <span className={getRoleBadgeClass(msg.senderRole)}>
+                            {' '}({getRoleLabel(msg.senderRole)})
+                          </span>
+                        </span>
+                        <span className={styles.messageDate}>
+                          {new Date(msg.sentAt).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className={styles.messageSubject}>{msg.subject}</div>
+                      <div className={styles.messageBody}>{msg.body}</div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Diplomacy */}
+          <div className="panel">
+            <div className="panel-header">
+              <div className={styles.sectionHeader}>
+                <span>Diplomacy</span>
+                {canManageDiplomacy() && (
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => setShowDiplomacyForm(!showDiplomacyForm)}
+                  >
+                    {showDiplomacyForm ? 'Cancel' : 'New Relation'}
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="panel-body">
+              {showDiplomacyForm && (
+                <form onSubmit={handleProposeDiplomacy} className={styles.diplomacyForm}>
+                  <div className="form-group">
+                    <label className="form-label">Target Alliance ID:</label>
+                    <input
+                      type="text"
+                      className="input"
+                      placeholder="Enter alliance ID"
+                      value={targetAllianceId}
+                      onChange={(e) => setTargetAllianceId(e.target.value)}
+                      required
+                    />
+                    <small className={styles.helpText}>
+                      You can find alliance IDs by viewing their alliance page
+                    </small>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Relation Type:</label>
+                    <select
+                      className="input"
+                      value={relationType}
+                      onChange={(e) => setRelationType(e.target.value as 'nap' | 'confederation' | 'war')}
+                    >
+                      <option value="nap">Non-Aggression Pact (NAP)</option>
+                      <option value="confederation">Confederation</option>
+                      <option value="war">War</option>
+                    </select>
+                  </div>
+                  <button type="submit" className="btn btn-primary" disabled={proposingDiplomacy}>
+                    {proposingDiplomacy ? 'Processing...' : 'Propose Relation'}
+                  </button>
+                </form>
+              )}
+
+              <div className={styles.diplomacyList}>
+                {diplomacy.length === 0 ? (
+                  <p className={styles.emptyText}>No diplomatic relations.</p>
+                ) : (
+                  diplomacy.map((relation) => {
+                    const isInitiator = relation.initiatorId === alliance?.id;
+                    const otherAlliance = isInitiator ? relation.targetAlliance : relation.initiatorAlliance;
+                    const isPending = relation.status === 'pending';
+                    const canRespond = !isInitiator && isPending;
+
+                    return (
+                      <div key={relation.id} className={styles.diplomacyItem}>
+                        <div className={styles.diplomacyHeader}>
+                          <span
+                            className={styles.relationType}
+                            style={{ color: getRelationTypeColor(relation.relationType) }}
+                          >
+                            {getRelationTypeLabel(relation.relationType)}
+                          </span>
+                          <span className={styles.diplomacyStatus}>
+                            {relation.status === 'pending' && '(Pending)'}
+                            {relation.status === 'accepted' && '(Active)'}
+                            {relation.status === 'rejected' && '(Rejected)'}
+                          </span>
+                        </div>
+                        <div className={styles.diplomacyAlliance}>
+                          <strong>{isInitiator ? 'With:' : 'From:'}</strong> [{otherAlliance.tag}] {otherAlliance.name}
+                        </div>
+                        <div className={styles.diplomacyDate}>
+                          {new Date(relation.createdAt).toLocaleDateString()}
+                        </div>
+                        <div className={styles.diplomacyActions}>
+                          {canRespond && (
+                            <>
+                              <button
+                                className="btn btn-primary btn-sm"
+                                onClick={() => handleAcceptDiplomacy(relation.id)}
+                              >
+                                Accept
+                              </button>
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => handleRejectDiplomacy(relation.id)}
+                              >
+                                Reject
+                              </button>
+                            </>
+                          )}
+                          {canManageDiplomacy() && relation.status === 'accepted' && (
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => handleEndDiplomacy(relation.id)}
+                            >
+                              End Relation
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
           </div>

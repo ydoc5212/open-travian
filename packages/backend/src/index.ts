@@ -17,9 +17,18 @@ import { allianceRouter } from './routes/alliance';
 import { marketplaceRouter } from './routes/marketplace';
 import { heroRouter } from './routes/hero';
 import { plusRouter } from './routes/plus';
+import { goldRouter } from './routes/gold';
+import { farmListRouter } from './routes/farmlist';
+import { messagesRouter } from './routes/messages';
+import { celebrationRouter } from './routes/celebration';
+import { adventureRouter } from './routes/adventure';
+import { expansionRouter } from './routes/expansion';
+import { artefactsRouter } from './routes/artefacts';
+import { worldWondersRouter } from './routes/worldWonders';
 import { authMiddleware } from './middleware/auth';
 import { setupSocketHandlers } from './socket';
 import { startJobProcessor } from './jobs/processor';
+import { initializeNatarScheduler } from './services/natarService';
 
 const app = express();
 const httpServer = createServer(app);
@@ -57,6 +66,14 @@ app.use('/api/alliance', authMiddleware, allianceRouter);
 app.use('/api/marketplace', authMiddleware, marketplaceRouter);
 app.use('/api/hero', authMiddleware, heroRouter);
 app.use('/api/plus', authMiddleware, plusRouter);
+app.use('/api/gold', authMiddleware, goldRouter);
+app.use('/api/farm-lists', authMiddleware, farmListRouter);
+app.use('/api/messages', authMiddleware, messagesRouter);
+app.use('/api/celebration', authMiddleware, celebrationRouter);
+app.use('/api/adventure', authMiddleware, adventureRouter);
+app.use('/api/expansion', authMiddleware, expansionRouter);
+app.use('/api/artefacts', authMiddleware, artefactsRouter);
+app.use('/api/world-wonders', authMiddleware, worldWondersRouter);
 
 // Socket.io setup
 setupSocketHandlers(io);
@@ -74,6 +91,9 @@ async function main() {
     // Start background job processor
     await startJobProcessor(io);
     console.log('Job processor started');
+
+    // Initialize Natar attack scheduler for end-game content
+    initializeNatarScheduler();
 
     httpServer.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);

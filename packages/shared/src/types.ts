@@ -53,6 +53,8 @@ export type BuildingType =
   | 'barracks' | 'stable' | 'workshop' | 'academy' | 'smithy' | 'rally_point' | 'wall'
   // Expansion
   | 'residence' | 'palace'
+  // Culture & Special
+  | 'tournament_square' | 'stonemason' | 'heros_mansion'
   // Roman unique
   | 'horse_drinking_trough'
   // Gaul unique
@@ -107,6 +109,9 @@ export interface VillageData {
   buildings: BuildingInstance[];
   resourceFields: ResourceFieldInstance[];
   troops: TroopData[];
+  celebrationEndsAt?: Date;
+  celebrationType?: CelebrationType;
+  lastCelebrationAt?: Date;
 }
 
 export interface BuildingInstance {
@@ -138,12 +143,16 @@ export interface TroopData {
   villageId: string;
   unitType: UnitType;
   quantity: number;
-  status: 'home' | 'attacking' | 'reinforcing' | 'returning';
+  status: 'home' | 'attacking' | 'reinforcing' | 'returning' | 'trapped';
   destinationVillageId?: string;
   arrivesAt?: Date;
+  originalOwnerId?: string; // For trapped troops and reinforcements
+  trappedAt?: Date; // When troops were trapped
 }
 
-export type AttackType = 'attack' | 'raid' | 'scout' | 'reinforcement';
+export type AttackType = 'attack' | 'raid' | 'scout' | 'reinforcement' | 'conquest';
+
+export type CelebrationType = 'small' | 'large';
 
 export interface AttackData {
   id: string;
@@ -154,6 +163,7 @@ export interface AttackData {
   launchedAt: Date;
   arrivesAt: Date;
   resolved: boolean;
+  isConquest?: boolean;
 }
 
 export interface BattleReport {

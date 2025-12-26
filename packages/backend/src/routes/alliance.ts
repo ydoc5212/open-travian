@@ -19,6 +19,16 @@ const changeRoleSchema = z.object({
   role: z.enum(['member', 'officer', 'leader']),
 });
 
+const allianceMessageSchema = z.object({
+  subject: z.string().min(1).max(100),
+  body: z.string().min(1).max(5000),
+});
+
+const diplomacySchema = z.object({
+  targetAllianceId: z.string(),
+  relationType: z.enum(['nap', 'confederation', 'war']),
+});
+
 // GET /api/alliance - Get current user's alliance info
 router.get('/', async (req: AuthRequest, res: Response) => {
   try {
@@ -560,6 +570,658 @@ router.put('/role/:userId', async (req: AuthRequest, res: Response) => {
   } catch (error) {
     console.error('Error changing role:', error);
     res.status(500).json({ success: false, error: 'Failed to change role' });
+  }
+});
+
+// ============================================
+// ALLIANCE MESSAGING (Circular Messages)
+// ============================================
+
+// GET /api/alliance/messages - Get alliance circular messages
+router.get('/messages', async (req: AuthRequest, res: Response) => {
+  try {
+    // Get user's alliance membership
+    const membership = await prisma.allianceMember.findUnique({
+      where: { userId: req.userId },
+    });
+
+    if (!membership) {
+      return res.status(400).json({
+        success: false,
+        error: 'You are not in an alliance',
+      });
+    }
+
+    // Get alliance messages
+    const messages = await prisma.allianceMessage.findMany({
+      where: {
+        allianceId: membership.allianceId,
+      },
+      orderBy: {
+        sentAt: 'desc',
+      },
+      take: 50, // Limit to last 50 messages
+    });
+
+    // Get sender information
+    const sendersInfo = await prisma.user.findMany({
+      where: {
+        id: {
+          in: messages.map((m) => m.senderId),
+        },
+      },
+      select: {
+        id: true,
+        username: true,
+        allianceMembership: {
+          select: {
+            role: true,
+          },
+        },
+      },
+    });
+
+    const senderMap = new Map(sendersInfo.map((s) => [s.id, s]));
+
+    // Format messages
+    const formattedMessages = messages.map((m) => {
+      const sender = senderMap.get(m.senderId);
+      return {
+        id: m.id,
+        senderId: m.senderId,
+        senderUsername: sender?.username || 'Unknown',
+        senderRole: sender?.allianceMembership?.role || 'member',
+        subject: m.subject,
+        body: m.body,
+        sentAt: m.sentAt,
+      };
+    });
+
+    res.json({
+      success: true,
+      data: { messages: formattedMessages },
+    });
+  } catch (error) {
+    console.error('Error fetching alliance messages:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch alliance messages' });
+  }
+});
+
+// POST /api/alliance/messages - Send circular message to all alliance members
+router.post('/messages', async (req: AuthRequest, res: Response) => {
+  try {
+    const validation = allianceMessageSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({
+        success: false,
+        error: validation.error.errors[0].message,
+      });
+    }
+
+    const { subject, body } = validation.data;
+
+    // Get user's alliance membership
+    const membership = await prisma.allianceMember.findUnique({
+      where: { userId: req.userId },
+    });
+
+    if (!membership) {
+      return res.status(400).json({
+        success: false,
+        error: 'You are not in an alliance',
+      });
+    }
+
+    // Only leaders and officers can send circular messages
+    if (!['founder', 'leader', 'officer'].includes(membership.role)) {
+      return res.status(403).json({
+        success: false,
+        error: 'Only alliance leaders and officers can send circular messages',
+      });
+    }
+
+    // Create alliance message
+    const message = await prisma.allianceMessage.create({
+      data: {
+        allianceId: membership.allianceId,
+        senderId: req.userId!,
+        subject,
+        body,
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      data: { message },
+    });
+  } catch (error) {
+    console.error('Error sending alliance message:', error);
+    res.status(500).json({ success: false, error: 'Failed to send alliance message' });
+  }
+});
+
+// ============================================
+// ALLIANCE DIPLOMACY
+// ============================================
+
+// GET /api/alliance/diplomacy - Get all diplomatic relations
+router.get('/diplomacy', async (req: AuthRequest, res: Response) => {
+  try {
+    // Get user's alliance membership
+    const membership = await prisma.allianceMember.findUnique({
+      where: { userId: req.userId },
+    });
+
+    if (!membership) {
+      return res.status(400).json({
+        success: false,
+        error: 'You are not in an alliance',
+      });
+    }
+
+    // Get all diplomatic relations where this alliance is involved
+    const relations = await prisma.allianceDiplomacy.findMany({
+      where: {
+        OR: [
+          { initiatorId: membership.allianceId },
+          { targetId: membership.allianceId },
+        ],
+      },
+      include: {
+        initiatorAlliance: {
+          select: {
+            id: true,
+            name: true,
+            tag: true,
+          },
+        },
+        targetAlliance: {
+          select: {
+            id: true,
+            name: true,
+            tag: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    res.json({
+      success: true,
+      data: { relations },
+    });
+  } catch (error) {
+    console.error('Error fetching diplomacy:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch diplomacy' });
+  }
+});
+
+// POST /api/alliance/diplomacy - Propose diplomatic relation
+router.post('/diplomacy', async (req: AuthRequest, res: Response) => {
+  try {
+    const validation = diplomacySchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({
+        success: false,
+        error: validation.error.errors[0].message,
+      });
+    }
+
+    const { targetAllianceId, relationType } = validation.data;
+
+    // Get user's alliance membership
+    const membership = await prisma.allianceMember.findUnique({
+      where: { userId: req.userId },
+    });
+
+    if (!membership) {
+      return res.status(400).json({
+        success: false,
+        error: 'You are not in an alliance',
+      });
+    }
+
+    // Only founders and leaders can manage diplomacy
+    if (!['founder', 'leader'].includes(membership.role)) {
+      return res.status(403).json({
+        success: false,
+        error: 'Only alliance founders and leaders can manage diplomacy',
+      });
+    }
+
+    // Cannot create relation with own alliance
+    if (targetAllianceId === membership.allianceId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Cannot create diplomatic relation with your own alliance',
+      });
+    }
+
+    // Check if target alliance exists
+    const targetAlliance = await prisma.alliance.findUnique({
+      where: { id: targetAllianceId },
+    });
+
+    if (!targetAlliance) {
+      return res.status(404).json({
+        success: false,
+        error: 'Target alliance not found',
+      });
+    }
+
+    // Check if relation already exists
+    const existingRelation = await prisma.allianceDiplomacy.findFirst({
+      where: {
+        OR: [
+          { initiatorId: membership.allianceId, targetId: targetAllianceId },
+          { initiatorId: targetAllianceId, targetId: membership.allianceId },
+        ],
+      },
+    });
+
+    if (existingRelation) {
+      return res.status(400).json({
+        success: false,
+        error: 'A diplomatic relation already exists with this alliance',
+      });
+    }
+
+    // Create diplomatic relation
+    const relation = await prisma.allianceDiplomacy.create({
+      data: {
+        initiatorId: membership.allianceId,
+        targetId: targetAllianceId,
+        relationType,
+        status: relationType === 'war' ? 'accepted' : 'pending', // War doesn't need acceptance
+      },
+      include: {
+        initiatorAlliance: {
+          select: {
+            id: true,
+            name: true,
+            tag: true,
+          },
+        },
+        targetAlliance: {
+          select: {
+            id: true,
+            name: true,
+            tag: true,
+          },
+        },
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      data: { relation },
+    });
+  } catch (error) {
+    console.error('Error creating diplomatic relation:', error);
+    res.status(500).json({ success: false, error: 'Failed to create diplomatic relation' });
+  }
+});
+
+// PUT /api/alliance/diplomacy/:id/accept - Accept diplomatic proposal
+router.put('/diplomacy/:id/accept', async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Get user's alliance membership
+    const membership = await prisma.allianceMember.findUnique({
+      where: { userId: req.userId },
+    });
+
+    if (!membership) {
+      return res.status(400).json({
+        success: false,
+        error: 'You are not in an alliance',
+      });
+    }
+
+    // Only founders and leaders can manage diplomacy
+    if (!['founder', 'leader'].includes(membership.role)) {
+      return res.status(403).json({
+        success: false,
+        error: 'Only alliance founders and leaders can manage diplomacy',
+      });
+    }
+
+    // Get the diplomatic relation
+    const relation = await prisma.allianceDiplomacy.findUnique({
+      where: { id },
+    });
+
+    if (!relation) {
+      return res.status(404).json({
+        success: false,
+        error: 'Diplomatic relation not found',
+      });
+    }
+
+    // Only target alliance can accept
+    if (relation.targetId !== membership.allianceId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Only the target alliance can accept this proposal',
+      });
+    }
+
+    // Update status
+    const updatedRelation = await prisma.allianceDiplomacy.update({
+      where: { id },
+      data: { status: 'accepted' },
+      include: {
+        initiatorAlliance: {
+          select: {
+            id: true,
+            name: true,
+            tag: true,
+          },
+        },
+        targetAlliance: {
+          select: {
+            id: true,
+            name: true,
+            tag: true,
+          },
+        },
+      },
+    });
+
+    res.json({
+      success: true,
+      data: { relation: updatedRelation },
+    });
+  } catch (error) {
+    console.error('Error accepting diplomatic relation:', error);
+    res.status(500).json({ success: false, error: 'Failed to accept diplomatic relation' });
+  }
+});
+
+// PUT /api/alliance/diplomacy/:id/reject - Reject diplomatic proposal
+router.put('/diplomacy/:id/reject', async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Get user's alliance membership
+    const membership = await prisma.allianceMember.findUnique({
+      where: { userId: req.userId },
+    });
+
+    if (!membership) {
+      return res.status(400).json({
+        success: false,
+        error: 'You are not in an alliance',
+      });
+    }
+
+    // Only founders and leaders can manage diplomacy
+    if (!['founder', 'leader'].includes(membership.role)) {
+      return res.status(403).json({
+        success: false,
+        error: 'Only alliance founders and leaders can manage diplomacy',
+      });
+    }
+
+    // Get the diplomatic relation
+    const relation = await prisma.allianceDiplomacy.findUnique({
+      where: { id },
+    });
+
+    if (!relation) {
+      return res.status(404).json({
+        success: false,
+        error: 'Diplomatic relation not found',
+      });
+    }
+
+    // Only target alliance can reject
+    if (relation.targetId !== membership.allianceId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Only the target alliance can reject this proposal',
+      });
+    }
+
+    // Update status
+    const updatedRelation = await prisma.allianceDiplomacy.update({
+      where: { id },
+      data: { status: 'rejected' },
+      include: {
+        initiatorAlliance: {
+          select: {
+            id: true,
+            name: true,
+            tag: true,
+          },
+        },
+        targetAlliance: {
+          select: {
+            id: true,
+            name: true,
+            tag: true,
+          },
+        },
+      },
+    });
+
+    res.json({
+      success: true,
+      data: { relation: updatedRelation },
+    });
+  } catch (error) {
+    console.error('Error rejecting diplomatic relation:', error);
+    res.status(500).json({ success: false, error: 'Failed to reject diplomatic relation' });
+  }
+});
+
+// DELETE /api/alliance/diplomacy/:id - Cancel/end diplomatic relation
+router.delete('/diplomacy/:id', async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Get user's alliance membership
+    const membership = await prisma.allianceMember.findUnique({
+      where: { userId: req.userId },
+    });
+
+    if (!membership) {
+      return res.status(400).json({
+        success: false,
+        error: 'You are not in an alliance',
+      });
+    }
+
+    // Only founders and leaders can manage diplomacy
+    if (!['founder', 'leader'].includes(membership.role)) {
+      return res.status(403).json({
+        success: false,
+        error: 'Only alliance founders and leaders can manage diplomacy',
+      });
+    }
+
+    // Get the diplomatic relation
+    const relation = await prisma.allianceDiplomacy.findUnique({
+      where: { id },
+    });
+
+    if (!relation) {
+      return res.status(404).json({
+        success: false,
+        error: 'Diplomatic relation not found',
+      });
+    }
+
+    // Must be part of the relation
+    if (relation.initiatorId !== membership.allianceId && relation.targetId !== membership.allianceId) {
+      return res.status(403).json({
+        success: false,
+        error: 'You are not part of this diplomatic relation',
+      });
+    }
+
+    // Delete the relation
+    await prisma.allianceDiplomacy.delete({
+      where: { id },
+    });
+
+    res.json({
+      success: true,
+      data: { message: 'Diplomatic relation ended' },
+    });
+  } catch (error) {
+    console.error('Error ending diplomatic relation:', error);
+    res.status(500).json({ success: false, error: 'Failed to end diplomatic relation' });
+  }
+});
+
+// ============================================
+// ALLIANCE ATTACK PLANNING
+// ============================================
+
+// GET /api/alliance/attack-plans - Get active attack plans for alliance
+router.get('/attack-plans', async (req: AuthRequest, res: Response) => {
+  try {
+    const membership = await prisma.allianceMember.findUnique({
+      where: { userId: req.userId },
+    });
+
+    if (!membership) {
+      return res.status(400).json({ success: false, error: 'You are not in an alliance' });
+    }
+
+    const attackPlans = await prisma.attackPlan.findMany({
+      where: {
+        allianceId: membership.allianceId,
+        status: 'active',
+      },
+      orderBy: { plannedAt: 'asc' },
+    });
+
+    // Get creator info for each plan
+    const creatorIds = [...new Set(attackPlans.map((p) => p.creatorId))];
+    const creators = await prisma.user.findMany({
+      where: { id: { in: creatorIds } },
+      select: { id: true, username: true },
+    });
+    const creatorMap = new Map(creators.map((c) => [c.id, c.username]));
+
+    const plansWithDetails = attackPlans.map((plan) => ({
+      id: plan.id,
+      target: { x: plan.targetX, y: plan.targetY },
+      targetName: plan.targetName,
+      plannedAt: plan.plannedAt.toISOString(),
+      description: plan.description,
+      creator: creatorMap.get(plan.creatorId) || 'Unknown',
+      createdAt: plan.createdAt.toISOString(),
+    }));
+
+    res.json({
+      success: true,
+      data: { attackPlans: plansWithDetails },
+    });
+  } catch (error) {
+    console.error('Error fetching attack plans:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch attack plans' });
+  }
+});
+
+// POST /api/alliance/attack-plans - Create new attack plan
+router.post('/attack-plans', async (req: AuthRequest, res: Response) => {
+  try {
+    const { targetX, targetY, targetName, plannedAt, description } = req.body;
+
+    const membership = await prisma.allianceMember.findUnique({
+      where: { userId: req.userId },
+    });
+
+    if (!membership) {
+      return res.status(400).json({ success: false, error: 'You are not in an alliance' });
+    }
+
+    // Only officers and above can create attack plans
+    if (!['founder', 'leader', 'officer'].includes(membership.role)) {
+      return res.status(403).json({
+        success: false,
+        error: 'Only officers and above can create attack plans',
+      });
+    }
+
+    const plan = await prisma.attackPlan.create({
+      data: {
+        allianceId: membership.allianceId,
+        creatorId: req.userId!,
+        targetX,
+        targetY,
+        targetName: targetName || null,
+        plannedAt: new Date(plannedAt),
+        description: description || null,
+      },
+    });
+
+    res.json({
+      success: true,
+      data: {
+        attackPlan: {
+          id: plan.id,
+          target: { x: plan.targetX, y: plan.targetY },
+          targetName: plan.targetName,
+          plannedAt: plan.plannedAt.toISOString(),
+          description: plan.description,
+        },
+      },
+    });
+  } catch (error) {
+    console.error('Error creating attack plan:', error);
+    res.status(500).json({ success: false, error: 'Failed to create attack plan' });
+  }
+});
+
+// DELETE /api/alliance/attack-plans/:id - Cancel attack plan
+router.delete('/attack-plans/:id', async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const membership = await prisma.allianceMember.findUnique({
+      where: { userId: req.userId },
+    });
+
+    if (!membership) {
+      return res.status(400).json({ success: false, error: 'You are not in an alliance' });
+    }
+
+    const plan = await prisma.attackPlan.findUnique({
+      where: { id },
+    });
+
+    if (!plan) {
+      return res.status(404).json({ success: false, error: 'Attack plan not found' });
+    }
+
+    if (plan.allianceId !== membership.allianceId) {
+      return res.status(403).json({ success: false, error: 'This plan belongs to another alliance' });
+    }
+
+    // Only creator, officers, and leaders can cancel
+    if (plan.creatorId !== req.userId && !['founder', 'leader', 'officer'].includes(membership.role)) {
+      return res.status(403).json({ success: false, error: 'You cannot cancel this attack plan' });
+    }
+
+    await prisma.attackPlan.update({
+      where: { id },
+      data: { status: 'cancelled' },
+    });
+
+    res.json({
+      success: true,
+      data: { message: 'Attack plan cancelled' },
+    });
+  } catch (error) {
+    console.error('Error cancelling attack plan:', error);
+    res.status(500).json({ success: false, error: 'Failed to cancel attack plan' });
   }
 });
 

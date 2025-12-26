@@ -12,22 +12,26 @@ datasource db {
 // ============================================
 
 model User {
-  id              String    @id @default(uuid())
-  email           String    @unique
-  username        String    @unique
-  passwordHash    String    @map("password_hash")
-  tribe           String    // 'romans' | 'gauls' | 'teutons'
-  createdAt       DateTime  @default(now()) @map("created_at")
-  lastActiveAt    DateTime  @default(now()) @map("last_active_at")
+  id               String    @id @default(uuid())
+  email            String    @unique
+  username         String    @unique
+  passwordHash     String    @map("password_hash")
+  tribe            String // 'romans' | 'gauls' | 'teutons'
+  gold             Int       @default(100)
+  createdAt        DateTime  @default(now()) @map("created_at")
+  lastActiveAt     DateTime  @default(now()) @map("last_active_at")
   plusAccountUntil DateTime? @map("plus_account_until") // Plus account expiration
+  goldClubUntil    DateTime? @map("gold_club_until") // Gold Club membership expiration
 
   // Relations
-  villages         Village[]
+  villages           Village[]
   allianceMembership AllianceMember?
-  sentMessages     Message[]       @relation("SentMessages")
-  receivedMessages Message[]       @relation("ReceivedMessages")
-  reports          Report[]
-  hero             Hero?
+  sentMessages       Message[]       @relation("SentMessages")
+  receivedMessages   Message[]       @relation("ReceivedMessages")
+  reports            Report[]
+  hero               Hero?
+  farmLists          FarmList[]
+  resourceBonuses    ResourceBonus[]
 
   @@map("users")
 }
@@ -37,21 +41,26 @@ model User {
 // ============================================
 
 model Village {
-  id          String   @id @default(uuid())
-  userId      String   @map("user_id")
-  name        String
-  xCoord      Int      @map("x_coord")
-  yCoord      Int      @map("y_coord")
-  isCapital   Boolean  @default(false) @map("is_capital")
-  loyalty     Int      @default(100)
-  population  Int      @default(0)
-  createdAt   DateTime @default(now()) @map("created_at")
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  name       String
+  xCoord     Int      @map("x_coord")
+  yCoord     Int      @map("y_coord")
+  isCapital  Boolean  @default(false) @map("is_capital")
+  loyalty    Int      @default(100)
+  population Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Expansion & Conquest
+  celebrationEndsAt DateTime? @map("celebration_ends_at") // Ongoing celebration
+  celebrationType   String?   @map("celebration_type") // 'small' | 'large' | null
+  lastCelebrationAt DateTime? @map("last_celebration_at") // Last completed celebration
 
   // Resources (stored amounts)
-  lumber      Float    @default(750)
-  clay        Float    @default(750)
-  iron        Float    @default(750)
-  crop        Float    @default(750)
+  lumber Float @default(750)
+  clay   Float @default(750)
+  iron   Float @default(750)
+  crop   Float @default(750)
 
   // Storage capacities
   warehouseCapacity Int @default(800) @map("warehouse_capacity")
@@ -61,7 +70,7 @@ model Village {
   resourcesLastCalculatedAt DateTime @default(now()) @map("resources_last_calculated_at")
 
   // Relations
-  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   buildings      Building[]
   resourceFields ResourceField[]
   troops         Troop[]
@@ -69,11 +78,12 @@ model Village {
   outgoingAttacks Attack[] @relation("AttackerVillage")
   incomingAttacks Attack[] @relation("DefenderVillage")
 
-  marketOffers       MarketOffer[]
-  outgoingTrades     TradeRoute[]  @relation("TradesFrom")
-  incomingTrades     TradeRoute[]  @relation("TradesTo")
-  heroes             Hero[]
-  ownedOases         Oasis[]
+  marketOffers   MarketOffer[]
+  outgoingTrades TradeRoute[]  @relation("TradesFrom")
+  incomingTrades TradeRoute[]  @relation("TradesTo")
+  heroes         Hero[]
+  ownedOases     Oasis[]
+  artefacts      Artefact[]
 
   @@unique([xCoord, yCoord])
   @@index([userId])
@@ -87,8 +97,8 @@ model Village {
 model Building {
   id               String    @id @default(uuid())
   villageId        String    @map("village_id")
-  slot             Int       // 1-22 for village center buildings
-  type             String?   // BuildingType or null if empty slot
+  slot             Int // 1-22 for village center buildings
+  type             String? // BuildingType or null if empty slot
   level            Int       @default(0)
   upgradeStartedAt DateTime? @map("upgrade_started_at")
   upgradeEndsAt    DateTime? @map("upgrade_ends_at")
@@ -103,8 +113,8 @@ model Building {
 model ResourceField {
   id               String    @id @default(uuid())
   villageId        String    @map("village_id")
-  slot             Int       // 1-18 for resource fields
-  type             String    // ResourceFieldType: 'woodcutter' | 'clay_pit' | 'iron_mine' | 'cropland'
+  slot             Int // 1-18 for resource fields
+  type             String // ResourceFieldType: 'woodcutter' | 'clay_pit' | 'iron_mine' | 'cropland'
   level            Int       @default(0)
   upgradeStartedAt DateTime? @map("upgrade_started_at")
   upgradeEndsAt    DateTime? @map("upgrade_ends_at")
@@ -119,11 +129,11 @@ model ResourceField {
 model BuildingQueue {
   id           String   @id @default(uuid())
   villageId    String   @map("village_id")
-  slot         Int      // Building or resource field slot
+  slot         Int // Building or resource field slot
   isField      Boolean  @default(false) @map("is_field") // true for resource fields, false for buildings
   buildingType String?  @map("building_type") // BuildingType for new constructions, null for upgrades
   targetLevel  Int      @map("target_level")
-  position     Int      // Queue position (0 = active, 1 = queued)
+  position     Int // Queue position (0 = active, 1 = queued)
   createdAt    DateTime @default(now()) @map("created_at")
 
   @@index([villageId, position])
@@ -135,30 +145,35 @@ model BuildingQueue {
 // ============================================
 
 model Troop {
-  id                    String    @id @default(uuid())
-  villageId             String    @map("village_id")
-  unitType              String    @map("unit_type")
-  quantity              Int
-  status                String    @default("home") // 'home' | 'attacking' | 'reinforcing' | 'returning'
-  destinationVillageId  String?   @map("destination_village_id")
-  arrivesAt             DateTime? @map("arrives_at")
+  id                   String    @id @default(uuid())
+  villageId            String    @map("village_id")
+  unitType             String    @map("unit_type")
+  quantity             Int
+  status               String    @default("home") // 'home' | 'attacking' | 'reinforcing' | 'returning' | 'trapped'
+  destinationVillageId String?   @map("destination_village_id")
+  arrivesAt            DateTime? @map("arrives_at")
+  originalOwnerId      String?   @map("original_owner_id") // For trapped troops - track original village
+  trappedAt            DateTime? @map("trapped_at") // When troops were trapped
 
   village Village @relation(fields: [villageId], references: [id], onDelete: Cascade)
 
   @@index([villageId])
   @@index([destinationVillageId, arrivesAt])
+  @@index([status])
   @@map("troops")
 }
 
 model Attack {
-  id                 String   @id @default(uuid())
-  attackerVillageId  String   @map("attacker_village_id")
-  defenderVillageId  String   @map("defender_village_id")
-  attackType         String   @map("attack_type") // 'attack' | 'raid' | 'scout'
-  troops             String   // JSON string: Array of { unitType, quantity }
-  launchedAt         DateTime @default(now()) @map("launched_at")
-  arrivesAt          DateTime @map("arrives_at")
-  resolved           Boolean  @default(false)
+  id                String   @id @default(uuid())
+  attackerVillageId String   @map("attacker_village_id")
+  defenderVillageId String   @map("defender_village_id")
+  attackType        String   @map("attack_type") // 'attack' | 'raid' | 'scout' | 'conquest'
+  troops            String // JSON string: Array of { unitType, quantity }
+  targetBuilding    String?  @map("target_building") // For catapult attacks - which building to target
+  isConquest        Boolean  @default(false) @map("is_conquest") // Whether this is a conquest attack (chiefs/senators)
+  launchedAt        DateTime @default(now()) @map("launched_at")
+  arrivesAt         DateTime @map("arrives_at")
+  resolved          Boolean  @default(false)
 
   attackerVillage Village @relation("AttackerVillage", fields: [attackerVillageId], references: [id], onDelete: Cascade)
   defenderVillage Village @relation("DefenderVillage", fields: [defenderVillageId], references: [id], onDelete: Cascade)
@@ -173,13 +188,18 @@ model Attack {
 // ============================================
 
 model Alliance {
-  id         String   @id @default(uuid())
-  name       String   @unique
-  tag        String   @unique // 3-4 letter abbreviation
-  founderId  String   @map("founder_id")
-  createdAt  DateTime @default(now()) @map("created_at")
+  id        String   @id @default(uuid())
+  name      String   @unique
+  tag       String   @unique // 3-4 letter abbreviation
+  founderId String   @map("founder_id")
+  createdAt DateTime @default(now()) @map("created_at")
 
-  members AllianceMember[]
+  members            AllianceMember[]
+  allianceMessages   AllianceMessage[]
+  initiatedRelations AllianceDiplomacy[] @relation("InitiatorAlliance")
+  receivedRelations  AllianceDiplomacy[] @relation("TargetAlliance")
+  artefacts          Artefact[]
+  worldWonders       WorldWonder[]
 
   @@map("alliances")
 }
@@ -202,26 +222,61 @@ model AllianceMember {
 // ============================================
 
 model Message {
-  id          String   @id @default(uuid())
-  senderId    String   @map("sender_id")
-  recipientId String   @map("recipient_id")
-  subject     String
-  body        String
-  read        Boolean  @default(false)
-  sentAt      DateTime @default(now()) @map("sent_at")
+  id                 String   @id @default(uuid())
+  senderId           String   @map("sender_id")
+  recipientId        String   @map("recipient_id")
+  subject            String
+  body               String
+  read               Boolean  @default(false)
+  sentAt             DateTime @default(now()) @map("sent_at")
+  deletedBySender    Boolean  @default(false) @map("deleted_by_sender")
+  deletedByRecipient Boolean  @default(false) @map("deleted_by_recipient")
 
   sender    User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
   recipient User @relation("ReceivedMessages", fields: [recipientId], references: [id], onDelete: Cascade)
 
   @@index([recipientId, read])
+  @@index([senderId])
   @@map("messages")
+}
+
+model AllianceMessage {
+  id         String   @id @default(uuid())
+  allianceId String   @map("alliance_id")
+  senderId   String   @map("sender_id")
+  subject    String
+  body       String
+  sentAt     DateTime @default(now()) @map("sent_at")
+
+  alliance Alliance @relation(fields: [allianceId], references: [id], onDelete: Cascade)
+
+  @@index([allianceId, sentAt])
+  @@map("alliance_messages")
+}
+
+model AllianceDiplomacy {
+  id           String   @id @default(uuid())
+  initiatorId  String   @map("initiator_id")
+  targetId     String   @map("target_id")
+  relationType String   @map("relation_type") // 'nap' | 'confederation' | 'war'
+  status       String   @default("pending") // 'pending' | 'accepted' | 'rejected'
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  initiatorAlliance Alliance @relation("InitiatorAlliance", fields: [initiatorId], references: [id], onDelete: Cascade)
+  targetAlliance    Alliance @relation("TargetAlliance", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@unique([initiatorId, targetId])
+  @@index([initiatorId])
+  @@index([targetId])
+  @@map("alliance_diplomacy")
 }
 
 model Report {
   id        String   @id @default(uuid())
   userId    String   @map("user_id")
-  type      String   // 'battle' | 'scout' | 'trade' | 'reinforcement'
-  data      String   // JSON string: Report-specific data
+  type      String // 'battle' | 'scout' | 'trade' | 'reinforcement'
+  data      String // JSON string: Report-specific data
   read      Boolean  @default(false)
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -237,9 +292,9 @@ model Report {
 
 model GameJob {
   id           String   @id @default(uuid())
-  type         String   // 'building_complete' | 'field_complete' | 'attack_resolve' | 'troop_training' | 'trade_arrive'
+  type         String // 'building_complete' | 'field_complete' | 'attack_resolve' | 'troop_training' | 'trade_arrive'
   villageId    String   @map("village_id")
-  data         String   // JSON string: Job-specific data
+  data         String // JSON string: Job-specific data
   scheduledFor DateTime @map("scheduled_for")
   processed    Boolean  @default(false)
   createdAt    DateTime @default(now()) @map("created_at")
@@ -253,14 +308,14 @@ model GameJob {
 // ============================================
 
 model MarketOffer {
-  id           String   @id @default(uuid())
-  villageId    String   @map("village_id")
-  offerType    String   @map("offer_type") // 'lumber' | 'clay' | 'iron' | 'crop'
-  offerAmount  Int      @map("offer_amount")
-  wantType     String   @map("want_type") // 'lumber' | 'clay' | 'iron' | 'crop'
-  wantAmount   Int      @map("want_amount")
-  createdAt    DateTime @default(now()) @map("created_at")
-  expiresAt    DateTime @map("expires_at")
+  id          String   @id @default(uuid())
+  villageId   String   @map("village_id")
+  offerType   String   @map("offer_type") // 'lumber' | 'clay' | 'iron' | 'crop'
+  offerAmount Int      @map("offer_amount")
+  wantType    String   @map("want_type") // 'lumber' | 'clay' | 'iron' | 'crop'
+  wantAmount  Int      @map("want_amount")
+  createdAt   DateTime @default(now()) @map("created_at")
+  expiresAt   DateTime @map("expires_at")
 
   village Village @relation(fields: [villageId], references: [id], onDelete: Cascade)
 
@@ -270,12 +325,12 @@ model MarketOffer {
 }
 
 model TradeRoute {
-  id              String   @id @default(uuid())
-  fromVillageId   String   @map("from_village_id")
-  toVillageId     String   @map("to_village_id")
-  resources       String   // JSON string: { lumber, clay, iron, crop }
-  departedAt      DateTime @default(now()) @map("departed_at")
-  arrivesAt       DateTime @map("arrives_at")
+  id            String   @id @default(uuid())
+  fromVillageId String   @map("from_village_id")
+  toVillageId   String   @map("to_village_id")
+  resources     String // JSON string: { lumber, clay, iron, crop }
+  departedAt    DateTime @default(now()) @map("departed_at")
+  arrivesAt     DateTime @map("arrives_at")
 
   fromVillage Village @relation("TradesFrom", fields: [fromVillageId], references: [id], onDelete: Cascade)
   toVillage   Village @relation("TradesTo", fields: [toVillageId], references: [id], onDelete: Cascade)
@@ -289,23 +344,23 @@ model TradeRoute {
 // ============================================
 
 model Hero {
-  id               String    @id @default(uuid())
-  userId           String    @unique @map("user_id")
-  name             String
-  level            Int       @default(1)
-  experience       Int       @default(0)
-  health           Int       @default(100)
-  strength         Int       @default(0) // Points allocated to strength
-  offBonus         Int       @default(0) // Offensive bonus percentage
-  defBonus         Int       @default(0) // Defensive bonus percentage
-  productionBonus  Int       @default(0) // Resource production bonus percentage
-  villageId        String?   @map("village_id") // Current location
-  status           String    @default("home") // 'home' | 'adventure' | 'dead'
-  revivedAt        DateTime? @map("revived_at")
-  createdAt        DateTime  @default(now()) @map("created_at")
+  id              String    @id @default(uuid())
+  userId          String    @unique @map("user_id")
+  name            String
+  level           Int       @default(1)
+  experience      Int       @default(0)
+  health          Int       @default(100)
+  strength        Int       @default(0) // Points allocated to strength
+  offBonus        Int       @default(0) // Offensive bonus percentage
+  defBonus        Int       @default(0) // Defensive bonus percentage
+  productionBonus Int       @default(0) // Resource production bonus percentage
+  villageId       String?   @map("village_id") // Current location
+  status          String    @default("home") // 'home' | 'adventure' | 'dead'
+  revivedAt       DateTime? @map("revived_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
 
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  village Village? @relation(fields: [villageId], references: [id], onDelete: SetNull)
+  user    User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  village Village?   @relation(fields: [villageId], references: [id], onDelete: SetNull)
   items   HeroItem[]
 
   @@index([userId])
@@ -331,16 +386,244 @@ model HeroItem {
 // ============================================
 
 model Oasis {
-  id           String    @id @default(uuid())
-  xCoord       Int       @map("x_coord")
-  yCoord       Int       @map("y_coord")
-  type         String    // 'lumber25' | 'lumber50' | 'clay25' | 'clay50' | 'iron25' | 'iron50' | 'crop25' | 'crop50'
-  ownerId      String?   @map("owner_id") // Village that owns this oasis
-  conqueredAt  DateTime? @map("conquered_at")
+  id          String    @id @default(uuid())
+  xCoord      Int       @map("x_coord")
+  yCoord      Int       @map("y_coord")
+  type        String // 'lumber25' | 'lumber50' | 'clay25' | 'clay50' | 'iron25' | 'iron50' | 'crop25' | 'crop50'
+  ownerId     String?   @map("owner_id") // Village that owns this oasis
+  conqueredAt DateTime? @map("conquered_at")
 
   owner Village? @relation(fields: [ownerId], references: [id], onDelete: SetNull)
 
   @@unique([xCoord, yCoord])
   @@index([ownerId])
   @@map("oases")
+}
+
+// ============================================
+// ARTEFACTS (END-GAME)
+// ============================================
+
+model Artefact {
+  id              String    @id @default(uuid())
+  type            String // 'unique' | 'large' | 'small'
+  effect          String // 'attack_bonus' | 'defense_bonus' | 'training_speed' | 'building_speed' | 'cranny_size' | 'troop_speed' | 'spy_defense' | 'resource_production' | 'world_wonder_plans'
+  size            Int       @default(1) // Magnitude: 1-5x effect
+  xCoord          Int       @map("x_coord")
+  yCoord          Int       @map("y_coord")
+  ownerId         String?   @map("owner_id") // Village that owns this artefact
+  ownerAllianceId String?   @map("owner_alliance_id") // Alliance ID for server-wide effects
+  capturedAt      DateTime? @map("captured_at")
+  activatedAt     DateTime? @map("activated_at") // Artefacts activate 24h after capture
+  spawnedAt       DateTime  @default(now()) @map("spawned_at")
+
+  owner         Village?  @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  ownerAlliance Alliance? @relation(fields: [ownerAllianceId], references: [id], onDelete: SetNull)
+
+  @@unique([xCoord, yCoord])
+  @@index([ownerId])
+  @@index([ownerAllianceId])
+  @@map("artefacts")
+}
+
+// ============================================
+// WORLD WONDERS (END-GAME)
+// ============================================
+
+model WorldWonder {
+  id              String    @id @default(uuid())
+  xCoord          Int       @map("x_coord")
+  yCoord          Int       @map("y_coord")
+  level           Int       @default(0)
+  ownerAllianceId String?   @map("owner_alliance_id")
+  capturedAt      DateTime? @map("captured_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  ownerAlliance Alliance?        @relation(fields: [ownerAllianceId], references: [id], onDelete: SetNull)
+  buildLogs     WorldWonderLog[]
+
+  @@unique([xCoord, yCoord])
+  @@index([ownerAllianceId])
+  @@index([level])
+  @@map("world_wonders")
+}
+
+model WorldWonderLog {
+  id            String   @id @default(uuid())
+  worldWonderId String   @map("world_wonder_id")
+  fromLevel     Int      @map("from_level")
+  toLevel       Int      @map("to_level")
+  allianceId    String   @map("alliance_id")
+  completedAt   DateTime @default(now()) @map("completed_at")
+
+  worldWonder WorldWonder @relation(fields: [worldWonderId], references: [id], onDelete: Cascade)
+
+  @@index([worldWonderId])
+  @@map("world_wonder_logs")
+}
+
+// ============================================
+// NATAR FACTION (END-GAME NPC)
+// ============================================
+
+model NatarVillage {
+  id        String   @id @default(uuid())
+  xCoord    Int      @map("x_coord")
+  yCoord    Int      @map("y_coord")
+  type      String // 'artefact_defender' | 'world_wonder_defender' | 'normal'
+  level     Int      @default(1) // Difficulty/strength level
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([xCoord, yCoord])
+  @@index([type])
+  @@map("natar_villages")
+}
+
+model NatarAttack {
+  id              String   @id @default(uuid())
+  targetVillageId String   @map("target_village_id")
+  troops          String // JSON string: Array of { unitType, quantity }
+  launchedAt      DateTime @default(now()) @map("launched_at")
+  arrivesAt       DateTime @map("arrives_at")
+  resolved        Boolean  @default(false)
+
+  @@index([targetVillageId, arrivesAt])
+  @@index([resolved, arrivesAt])
+  @@map("natar_attacks")
+}
+
+// ============================================
+// SERVER STATE (END-GAME)
+// ============================================
+
+model ServerState {
+  id                 String    @id @default(uuid())
+  phase              String    @default("normal") // 'normal' | 'artefacts_active' | 'world_wonder_race' | 'ended'
+  gameStartedAt      DateTime  @default(now()) @map("game_started_at")
+  artefactsSpawnedAt DateTime? @map("artefacts_spawned_at")
+  gameEndedAt        DateTime? @map("game_ended_at")
+  winnerAllianceId   String?   @map("winner_alliance_id")
+
+  @@map("server_state")
+}
+
+// ============================================
+// ALLIANCE ATTACK PLANS (Shared Attack Planning)
+// ============================================
+
+model AttackPlan {
+  id           String   @id @default(uuid())
+  allianceId   String   @map("alliance_id")
+  creatorId    String   @map("creator_id")
+  targetX      Int      @map("target_x")
+  targetY      Int      @map("target_y")
+  targetName   String?  @map("target_name") // Optional target description
+  plannedAt    DateTime @map("planned_at") // When the attack should land
+  description  String?  // Attack plan notes
+  status       String   @default("active") // 'active' | 'completed' | 'cancelled'
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([allianceId, status])
+  @@index([plannedAt])
+  @@map("attack_plans")
+}
+
+// ============================================
+// ADVENTURES
+// ============================================
+
+model Adventure {
+  id          String    @id @default(uuid())
+  heroId      String?   @map("hero_id")
+  xCoord      Int       @map("x_coord")
+  yCoord      Int       @map("y_coord")
+  difficulty  String    @default("normal") // 'easy' | 'normal' | 'hard'
+  status      String    @default("available") // 'available' | 'in_progress' | 'completed'
+  rewardType  String?   @map("reward_type") // 'resources' | 'troops' | 'item' | 'experience'
+  rewardData  String?   @map("reward_data") // JSON string with reward details
+  expiresAt   DateTime  @map("expires_at")
+  startedAt   DateTime? @map("started_at")
+  completesAt DateTime? @map("completes_at")
+  completedAt DateTime? @map("completed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@unique([xCoord, yCoord])
+  @@index([heroId])
+  @@index([expiresAt])
+  @@index([status])
+  @@map("adventures")
+}
+
+// ============================================
+// CELEBRATIONS
+// ============================================
+
+model Celebration {
+  id            String   @id @default(uuid())
+  villageId     String   @map("village_id")
+  type          String   // 'small' | 'large'
+  culturePoints Int      @default(0) @map("culture_points")
+  startedAt     DateTime @default(now()) @map("started_at")
+  endsAt        DateTime @map("ends_at")
+  completesAt   DateTime @map("completes_at")
+  completed     Boolean  @default(false)
+
+  @@index([villageId])
+  @@index([completesAt])
+  @@index([endsAt])
+  @@map("celebrations")
+}
+
+// ============================================
+// FARM LISTS (Gold Club Feature)
+// ============================================
+
+model FarmList {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries FarmListEntry[]
+
+  @@index([userId])
+  @@map("farm_lists")
+}
+
+model FarmListEntry {
+  id              String   @id @default(uuid())
+  farmListId      String   @map("farm_list_id")
+  targetVillageId String?  @map("target_village_id")
+  xCoord          Int      @map("x_coord")
+  yCoord          Int      @map("y_coord")
+  troops          String   // JSON string: Array of { unitType, quantity }
+  attackType      String   @default("raid") @map("attack_type") // 'raid' | 'attack'
+  lastRaidedAt    DateTime? @map("last_raided_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  farmList FarmList @relation(fields: [farmListId], references: [id], onDelete: Cascade)
+
+  @@index([farmListId])
+  @@map("farm_list_entries")
+}
+
+// ============================================
+// RESOURCE BONUSES (Gold Feature)
+// ============================================
+
+model ResourceBonus {
+  id           String    @id @default(uuid())
+  userId       String    @map("user_id")
+  resourceType String    @map("resource_type") // 'lumber' | 'clay' | 'iron' | 'crop' | 'all'
+  bonusPercent Int       @map("bonus_percent") // e.g., 25 for 25%
+  activatedAt  DateTime  @default(now()) @map("activated_at")
+  expiresAt    DateTime  @map("expires_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("resource_bonuses")
 }

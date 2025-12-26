@@ -178,10 +178,28 @@ export function GameLayout() {
           Reports
         </NavLink>
         <NavLink
+          to="/messages"
+          className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}
+        >
+          Messages
+        </NavLink>
+        <NavLink
           to="/alliance"
           className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}
         >
           Alliance
+        </NavLink>
+        <NavLink
+          to="/artefacts"
+          className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}
+        >
+          Artefacts
+        </NavLink>
+        <NavLink
+          to="/world-wonders"
+          className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}
+        >
+          World Wonders
         </NavLink>
       </nav>
 
