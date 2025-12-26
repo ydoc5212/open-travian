@@ -9,14 +9,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 16px;
-  background-image: url('/assets/ui/header_background.jpg');
-  background-repeat: repeat-x;
-  background-position: center;
-  background-color: #3d2817;
+  padding: 8px 16px;
+  background: linear-gradient(180deg, #5a4a3a 0%, #3d2817 100%);
   border-bottom: 2px solid #1a0f08;
-  gap: 16px;
-  min-height: 50px;
+  gap: 20px;
+  min-height: 44px;
 }
 
 .headerLeft {

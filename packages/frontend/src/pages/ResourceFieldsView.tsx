@@ -45,6 +45,14 @@ const FIELD_NAMES: Record<ResourceFieldType, string> = {
   cropland: 'Cropland',
 };
 
+// Map field types to TravianZ sprite IDs
+const FIELD_SPRITE_IDS: Record<ResourceFieldType, number> = {
+  woodcutter: 1,
+  clay_pit: 2,
+  iron_mine: 3,
+  cropland: 4,
+};
+
 export function ResourceFieldsView() {
   const currentVillage = useGameStore((state) => state.currentVillage);
   const updateResourceField = useGameStore((state) => state.updateResourceField);
@@ -113,6 +121,9 @@ export function ResourceFieldsView() {
           const isUpgradingField = field.upgradeEndsAt !== null;
           const fieldType = field.type as ResourceFieldType;
 
+          const spriteId = FIELD_SPRITE_IDS[fieldType];
+          const spriteSrc = `/assets/buildings/travian/g${spriteId}.gif`;
+
           return (
             <button
               key={pos.slot}
@@ -126,6 +137,11 @@ export function ResourceFieldsView() {
               onClick={() => setSelectedField(isSelected ? null : pos.slot)}
               title={`${FIELD_NAMES[fieldType]} (Level ${field.level})`}
             >
+              <img
+                src={spriteSrc}
+                alt={FIELD_NAMES[fieldType]}
+                className={styles.fieldSprite}
+              />
               <span className={styles.fieldLevel}>{field.level}</span>
               {isUpgradingField && (
                 <div className={styles.fieldTimer}>

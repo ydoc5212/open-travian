@@ -1,49 +1,52 @@
 .resourceBar {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   align-items: center;
 }
 
 .resourceItem {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  white-space: nowrap;
 }
 
 .resourceIcon {
   width: 18px;
   height: 12px;
   object-fit: contain;
+  flex-shrink: 0;
 }
 
 .resourceInfo {
   display: flex;
   align-items: baseline;
-  gap: 2px;
   font-family: Verdana, Arial, sans-serif;
+  font-size: 11px;
+  line-height: 1;
 }
 
 .resourceValue {
-  color: #f5deb3;
+  color: #000;
   font-weight: bold;
-  font-size: 0.8rem;
 }
 
 .resourceCapacity {
-  color: #a08060;
-  font-size: 0.75rem;
+  color: #666;
+  margin-left: 1px;
 }
 
 .resourceProduction {
-  font-size: 0.7rem;
+  font-size: 10px;
   font-family: Verdana, Arial, sans-serif;
-  margin-left: 4px;
+  margin-left: 3px;
+  line-height: 1;
 }
 
 .resourceProduction.positive {
-  color: #90EE90;
+  color: #006400;
 }
 
 .resourceProduction.negative {
-  color: #FF6B6B;
+  color: #8b0000;
 }

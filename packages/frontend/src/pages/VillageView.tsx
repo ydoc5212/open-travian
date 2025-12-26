@@ -8,6 +8,40 @@ import { Timer } from '../components/Timer';
 import { ResourceIcon, ResourceType } from '../components/ResourceIcon';
 import styles from './VillageView.module.css';
 
+// Map building types to TravianZ sprite IDs
+const BUILDING_SPRITE_IDS: Record<string, number> = {
+  main_building: 15,
+  rally_point: 16,
+  marketplace: 17,
+  embassy: 18,
+  barracks: 19,
+  stable: 20,
+  workshop: 21,
+  academy: 22,
+  cranny: 23,
+  town_hall: 24,
+  residence: 25,
+  palace: 26,
+  treasury: 27,
+  trade_office: 28,
+  great_barracks: 29,
+  great_stable: 30,
+  wall: 31, // varies by tribe
+  earth_wall: 32,
+  palisade: 33,
+  stonemason: 34,
+  brewery: 35,
+  trapper: 36,
+  heros_mansion: 37,
+  great_warehouse: 38,
+  great_granary: 39,
+  horse_drinking_trough: 41,
+  warehouse: 10,
+  granary: 11,
+  smithy: 13,
+  tournament_square: 14,
+};
+
 // Travian bg0.jpg village center building slot positions
 // Precisely calibrated to TravianZ bg0.jpg (556x406px)
 const BUILDING_POSITIONS = [
@@ -138,6 +172,9 @@ export function VillageView() {
           const isUpgradingSlot = building.upgradeEndsAt !== null;
           const isEmpty = !building.type;
 
+          const spriteId = building.type ? BUILDING_SPRITE_IDS[building.type] : null;
+          const spriteSrc = spriteId ? `/assets/buildings/travian/g${spriteId}b.gif` : null;
+
           return (
             <button
               key={pos.slot}
@@ -155,6 +192,13 @@ export function VillageView() {
                   : 'Empty slot'
               }
             >
+              {!isEmpty && spriteSrc && (
+                <img
+                  src={spriteSrc}
+                  alt={BUILDING_DATA[building.type as BuildingType]?.name || 'Building'}
+                  className={styles.buildingSprite}
+                />
+              )}
               {!isEmpty && (
                 <span className={styles.buildingLevel}>{building.level}</span>
               )}
