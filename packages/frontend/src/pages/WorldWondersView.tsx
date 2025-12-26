@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useAuthStore } from '../stores/authStore';
 import styles from './WorldWondersView.module.css';
-
-const API_URL = 'http://localhost:3001/api';
 
 interface WorldWonder {
   id: string;
@@ -41,15 +39,16 @@ export function WorldWondersView() {
 
   const fetchWorldWonders = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_URL}/world-wonders`, {
+      const token = useAuthStore.getState().token;
+      const response = await fetch('/api/world-wonders', {
         headers: { Authorization: `Bearer ${token}` },
       });
+      const data = await response.json();
 
-      if (response.data.success) {
-        setWorldWonders(response.data.data.worldWonders);
-        setServerPhase(response.data.data.serverPhase);
-        setGameStartedAt(response.data.data.gameStartedAt);
+      if (data.success) {
+        setWorldWonders(data.data.worldWonders);
+        setServerPhase(data.data.serverPhase);
+        setGameStartedAt(data.data.gameStartedAt);
       }
       setLoading(false);
     } catch (err) {

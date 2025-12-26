@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useAuthStore } from '../stores/authStore';
 import styles from './ArtefactsView.module.css';
-
-const API_URL = 'http://localhost:3001/api';
 
 interface Artefact {
   id: string;
@@ -46,13 +44,14 @@ export function ArtefactsView() {
 
   const fetchArtefacts = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_URL}/artefacts`, {
+      const token = useAuthStore.getState().token;
+      const response = await fetch('/api/artefacts', {
         headers: { Authorization: `Bearer ${token}` },
       });
+      const data = await response.json();
 
-      if (response.data.success) {
-        setArtefacts(response.data.data.artefacts);
+      if (data.success) {
+        setArtefacts(data.data.artefacts);
       }
       setLoading(false);
     } catch (err) {
